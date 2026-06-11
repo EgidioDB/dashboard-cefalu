@@ -238,12 +238,20 @@
     // --- 5. LOGICA MAPPA ED EVENTI ---
     function animateViewBox(svg, targetViewBox, duration) {
         const startVB = svg.viewBox.baseVal;
+        const start = { x: startVB.x, y: startVB.y, w: startVB.width, h: startVB.height };
         const startTime = performance.now();
+
         function update(currentTime) {
             let elapsed = currentTime - startTime;
             let progress = Math.min(elapsed / duration, 1);
             const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
-            svg.setAttribute('viewBox', `${startVB.x + (targetViewBox[0] - startVB.x) * ease} ${startVB.y + (targetViewBox[1] - startVB.y) * ease} ${startVB.width + (targetViewBox[2] - startVB.width) * ease} ${startVB.height + (targetViewBox[3] - startVB.height) * ease}`);
+
+            const curX = start.x + (targetViewBox[0] - start.x) * ease;
+            const curY = start.y + (targetViewBox[1] - start.y) * ease;
+            const curW = start.w + (targetViewBox[2] - start.w) * ease;
+            const curH = start.h + (targetViewBox[3] - start.h) * ease;
+
+            svg.setAttribute('viewBox', `${curX} ${curY} ${curW} ${curH}`);
             if (progress < 1) requestAnimationFrame(update);
         }
         requestAnimationFrame(update);
@@ -266,21 +274,33 @@
             </div>`;
     }
 
+    // 1. Funzione centralizzata per resettare la mappa (de-zoom e pulizia)
+    function resetMap() {
+        const svg = document.getElementById('italy-map');
+        document.querySelectorAll('.region').forEach(r => r.classList.remove('active'));
+        animateViewBox(svg, [0, 0, 610, 792], 600);
+        showTotalRegionalReport();
+        updateDonuts("Italia");
+    }
+
+    // 2. Click sulle Regioni
     document.querySelectorAll('.region').forEach(reg => {
-        reg.addEventListener('click', function() {
+        reg.addEventListener('click', function(event) {
+            event.stopPropagation(); // Evita che il click passi allo sfondo (mare)
+            
             const svg = document.getElementById('italy-map');
             const name = this.getAttribute('title');
             const isAlreadyActive = this.classList.contains('active');
             const fmt = (v) => (v - 100) > 0 ? '+' + (v - 100).toFixed(1) : (v - 100).toFixed(1);
 
             if (isAlreadyActive) {
-                this.classList.remove('active');
-                animateViewBox(svg, [0, 0, 610, 792], 600);
-                showTotalRegionalReport();
-                updateDonuts("Italia");
+                // Se ri-clicco la stessa regione, resetta
+                resetMap();
             } else {
+                // Se clicco una nuova regione
                 document.querySelectorAll('.region').forEach(r => r.classList.remove('active'));
                 this.classList.add('active');
+                
                 const bbox = this.getBBox();
                 animateViewBox(svg, [bbox.x - 30, bbox.y - 30, bbox.width + 60, bbox.height + 60], 600);
                 
@@ -291,32 +311,40 @@
                 document.getElementById('regionReportContent').innerHTML = `
                     <div class="report-title">${name}</div>
                     <div class="data-group">
-                        <div class="group-label">Pre-2012</div>
+                        <div class="group-label">Regione: Pre-2012</div>
                         <div class="data-row"><span>Arrivi</span><span class="value">${data.reg.preArr}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${data.reg.prePre}%</span></div>
-                        <div class="data-row"><span>Extra-Alb</span><span class="value">${data.reg.preExt}%</span></div><br>
-                        <div class="group-label" style="color:var(--accent); margin-top:10px">Post-2012</div>
+                        <div class="data-row"><span>Extra-Alb</span><span class="value">${data.reg.preExt}%</span></div>
+                        <div class="group-label" style="color:var(--accent); margin-top:10px">Regione: Post-2012</div>
                         <div class="data-row"><span>Arrivi</span><span class="value">${fmt(data.reg.arr)}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${fmt(data.reg.pre)}%</span></div>
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.reg.ext)}%</span></div>
                     </div>
-                    <div class="data-group" style="border-left: 4px solid #457b9d; background: #f0f7ff;"><br>
-                        <div class="group-label" style="color:#457b9d">Miglior comune: ${data.top.name}</div><br>
+                    <div class="data-group" style="border-left: 4px solid #457b9d; background: #f0f7ff;">
+                        <div class="group-label" style="color:#457b9d">Top City: ${data.top.name}</div>
                         <div class="group-label" style="font-size:0.6em; margin-top:5px;">Pre-2012</div>
                         <div class="data-row"><span>Arrivi</span><span class="value">${data.top.preArr}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${data.top.prePre}%</span></div>
-                        <div class="data-row"><span>Extra-Alb</span><span class="value">${data.top.preExt}%</span></div><br>
+                        <div class="data-row"><span>Extra-Alb</span><span class="value">${data.top.preExt}%</span></div>
                         <div class="group-label" style="font-size:0.6em; margin-top:5px; color:var(--accent)">Post-2012</div>
                         <div class="data-row"><span>Arrivi</span><span class="value">${fmt(data.top.arr)}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${fmt(data.top.pre)}%</span></div>
-                        <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.top.ext)}%</span></div><br>
-                        <div class="group-label" style="font-size:0.6em; margin-top:5px;">Confronto Media Nazionale<br>al 2024</div>
-                        <div class="data-row"><span>Arrivi</span><span class="value" style="color:${gapArr > 0 ? 'var(--accent)' : '#c0392b'}">${gapArr > 0 ? '+' : ''}${gapArr}%</span></div>
-                        <div class="data-row"><span>Presenze</span><span class="value" style="color:${gapPre > 0 ? 'var(--accent)' : '#c0392b'}">${gapPre > 0 ? '+' : ''}${gapPre}%</span></div>
+                        <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.top.ext)}%</span></div>
+                        <div class="group-label" style="font-size:0.6em; margin-top:5px;">Gap vs IT (2024)</div>
+                        <div class="data-row"><span>Gap Arrivi</span><span class="value" style="color:${gapArr > 0 ? 'var(--accent)' : '#c0392b'}">${gapArr > 0 ? '+' : ''}${gapArr}%</span></div>
+                        <div class="data-row"><span>Gap Presenze</span><span class="value" style="color:${gapPre > 0 ? 'var(--accent)' : '#c0392b'}">${gapPre > 0 ? '+' : ''}${gapPre}%</span></div>
                     </div>`;
                 updateDonuts(name);
             }
         });
+    });
+
+    // 3. Click sullo sfondo (il mare) per resettare tutto
+    document.getElementById('italy-map').addEventListener('click', function(event) {
+        // Se il click è avvenuto direttamente sull'SVG (e non su una path/regione)
+        if (event.target.tagName.toLowerCase() === 'svg') {
+            resetMap();
+        }
     });
 
     // --- 6. GRAFICO STORICO CEFALÙ ---
@@ -335,9 +363,11 @@
         { x: years, y: rawData.cefPre.map(v=>v-100), name: 'Cef: Presenze', line: {color: '#e63946', width: 3.5} },
         { x: years, y: rawData.cefArr.map(v=>v-100), name: 'Cef: Arrivi', line: {color: '#457b9d', width: 3.5} },
         { x: years, y: rawData.cefExt.map(v=>v-100), name: 'Cef: Extra-Alb', line: {color: '#24b27e', width: 4.5} },
-        { x: years, y: rawData.itPre.map(v=>v-100), name: 'IT: Presenze', line: {color: '#adb5bd', width: 2, dash: 'dot'} },
-        { x: years, y: rawData.itArr.map(v=>v-100), name: 'IT: Arrivi', line: {color: '#ced4da', width: 2, dash: 'dot'} },
-        { x: years, y: rawData.itExt.map(v=>v-100), name: 'IT: Extra-Alb', line: {color: '#99aab5', width: 2, dash: 'dot'} }
+        
+        // Nuovi colori per l'Italia (Tratteggiate)
+        { x: years, y: rawData.itPre.map(v=>v-100), name: 'IT: Presenze', line: {color: '#00ffea', width: 2, dash: 'dot'} }, // Giallo
+        { x: years, y: rawData.itArr.map(v=>v-100), name: 'IT: Arrivi', line: {color: '#ffc300', width: 2, dash: 'dot'} }, // Arancione
+        { x: years, y: rawData.itExt.map(v=>v-100), name: 'IT: Extra-Alb', line: {color: '#9c27b0', width: 2, dash: 'dot'} } // Fucsia
     ].map(t => ({...t, mode: 'lines+markers', hoverinfo: 'none'}));
 
     const baseShapes = [{ type: 'line', x0: 2012, x1: 2012, y0: 0, y1: 1, yref: 'paper', line: { color: '#000', width: 2, dash: 'dash' } }];
@@ -430,18 +460,18 @@
 
     // --- INIZIALIZZAZIONE GRAFICO ---
     Plotly.newPlot(chartDiv, traces, { 
-        dragmode: 'pan', // <-- FONDAMENTALE: pan per muovere con un dito. Il pinch a 2 dita zooma in automatico.
+        dragmode: 'pan', 
         showlegend: true, 
         legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' }, 
         margin: { l: 40, r: 15, t: 10, b: 80 }, 
         plot_bgcolor: '#ffffff', 
         xaxis: { gridcolor: '#f0f2f5', type: 'linear', dtick: 2, tickformat: 'd', autorange: true }, 
-        // yaxis DEVE avere fixedrange: false, ma NON avere autorange: true fisso, sennò scatta sul pinch
-        yaxis: { gridcolor: '#f0f2f5', ticksuffix: '%', fixedrange: false }, 
+        // IL SEGRETO: Blocchiamo la Y al tocco dell'utente. Lo zoom manuale sposterà SOLO la linea del tempo.
+        yaxis: { gridcolor: '#f0f2f5', ticksuffix: '%', fixedrange: true }, 
         shapes: baseShapes
     }, {
         responsive: true, 
-        scrollZoom: true, // <-- ATTIVA IL PINCH SU MOBILE E LA ROTELLA SU PC
+        scrollZoom: true, 
         displayModeBar: false
     });
     
@@ -454,28 +484,77 @@
     chartDiv.on('plotly_unhover', () => updateShapes(null));
     chartDiv.on('plotly_click', (data) => showYearlyReport(data.points[0].pointIndex));
     
-    // Funzione ritardata per l'autoscale (evita che scatti durante il pinch)
-    let resizeTimer;
-    chartDiv.on('plotly_relayout', function(eventdata){
-        // Ignoriamo l'autorange (il doppio click)
-        if (eventdata['xaxis.autorange']) return;
+    // --- LA FUNZIONE MAGICA CHE ADATTA L'ALTEZZA ---
+    function handleAutoScale() {
+        const xRange = chartDiv.layout.xaxis.range;
+        if (!xRange) return;
 
-        // Se l'utente ha mosso o zoomato l'asse X
-        if (eventdata['xaxis.range[0]'] !== undefined) {
-            clearTimeout(resizeTimer);
-            // Aspettiamo che l'utente finisca di fare pinch (150 millisecondi) prima di riadattare la Y
-            resizeTimer = setTimeout(() => {
-                handleAutoScale();
-            }, 150);
+        let minVal = Infinity;
+        let maxVal = -Infinity;
+
+        // Trova il punto più alto e più basso visibili in questo momento
+        traces.forEach(trace => {
+            trace.x.forEach((x, i) => {
+                if (x >= xRange[0] && x <= xRange[1]) {
+                    const y = trace.y[i];
+                    if (y < minVal) minVal = y;
+                    if (y > maxVal) maxVal = y;
+                }
+            });
+        });
+
+        if (minVal === Infinity) return; // Evita errori se si zooma nel vuoto
+
+        // Calcola la nuova altezza aggiungendo il 10% di margine (respiro)
+        const padding = (maxVal - minVal) * 0.1;
+        const newYRange = [minVal - padding, maxVal + padding];
+        const newDtick = (xRange[1] - xRange[0] < 8) ? 1 : 2;
+
+        const currentYRange = chartDiv.layout.yaxis.range;
+        
+        // Applica il ricalcolo solo se c'è un vero cambiamento (evita i loop infiniti)
+        if (!currentYRange || Math.abs(currentYRange[0] - newYRange[0]) > 1 || Math.abs(currentYRange[1] - newYRange[1]) > 1) {
+            Plotly.relayout(chartDiv, {
+                'yaxis.range': newYRange,
+                'xaxis.dtick': newDtick
+            });
+        }
+    }
+
+    // --- GESTIONE FLUIDA DEI TOCCHI ---
+    let isInteracting = false;
+    
+    // Blocca il ricalcolo mentre l'utente sta toccando lo schermo
+    chartDiv.addEventListener('touchstart', () => { isInteracting = true; }, {passive: true});
+    chartDiv.addEventListener('mousedown', () => { isInteracting = true; });
+
+    // Applica l'auto-adattamento appena le dita/mouse lasciano lo schermo
+    chartDiv.addEventListener('touchend', () => { 
+        isInteracting = false; 
+        setTimeout(handleAutoScale, 50); 
+    }, {passive: true});
+    chartDiv.addEventListener('mouseup', () => { 
+        isInteracting = false; 
+        setTimeout(handleAutoScale, 50);
+    });
+
+    // Se si usa la rotellina del mouse (dove non c'è tocco) adatta subito
+    chartDiv.on('plotly_relayout', function(eventdata){
+        if (eventdata['xaxis.autorange']) return;
+        if (eventdata['xaxis.range[0]'] !== undefined || eventdata['xaxis.range']) {
+            if (!isInteracting) {
+                setTimeout(handleAutoScale, 50);
+            }
         }
     });
 
-    // Reset totale al doppio click (su mobile è un doppio tap)
+    // Reset totale al doppio click/tap
     chartDiv.on('plotly_doubleclick', () => {
         setTimeout(() => {
             showTotalReport();
             updateDonuts("Italia");
             Plotly.relayout(chartDiv, { 
+                'xaxis.dtick': 2,
                 'xaxis.autorange': true, 
                 'yaxis.autorange': true, 
                 'xaxis.range': [2003.5, 2024.5] 
