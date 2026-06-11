@@ -428,32 +428,49 @@
         });
     }
 
-    // --- INIZIALIZZAZIONE ---
+    // --- INIZIALIZZAZIONE GRAFICO ---
     Plotly.newPlot(chartDiv, traces, { 
-        showlegend: true, legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' }, 
-        margin: { l: 40, r: 15, t: 10, b: 80 }, plot_bgcolor: '#ffffff', 
+        dragmode: 'pan', // <-- FONDAMENTALE: pan per muovere con un dito. Il pinch a 2 dita zooma in automatico.
+        showlegend: true, 
+        legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' }, 
+        margin: { l: 40, r: 15, t: 10, b: 80 }, 
+        plot_bgcolor: '#ffffff', 
         xaxis: { gridcolor: '#f0f2f5', type: 'linear', dtick: 2, tickformat: 'd', autorange: true }, 
-        yaxis: { gridcolor: '#f0f2f5', ticksuffix: '%', autorange: true }, 
-        shapes: baseShapes,
-        uirevision: 'true' 
-    }, {responsive: true, scrollZoom: true, displayModeBar: false});
+        // yaxis DEVE avere fixedrange: false, ma NON avere autorange: true fisso, sennò scatta sul pinch
+        yaxis: { gridcolor: '#f0f2f5', ticksuffix: '%', fixedrange: false }, 
+        shapes: baseShapes
+    }, {
+        responsive: true, 
+        scrollZoom: true, // <-- ATTIVA IL PINCH SU MOBILE E LA ROTELLA SU PC
+        displayModeBar: false
+    });
     
     showTotalReport();
     showTotalRegionalReport();
     updateDonuts("Italia");
 
+    // Eventi Hover e Click
     chartDiv.on('plotly_hover', (data) => updateShapes(data.points[0].x));
     chartDiv.on('plotly_unhover', () => updateShapes(null));
     chartDiv.on('plotly_click', (data) => showYearlyReport(data.points[0].pointIndex));
     
-    // Attiva il ricalcolo ad ogni spostamento/zoom
+    // Funzione ritardata per l'autoscale (evita che scatti durante il pinch)
+    let resizeTimer;
     chartDiv.on('plotly_relayout', function(eventdata){
-        if (eventdata['xaxis.range[0]'] !== undefined || eventdata['xaxis.autorange'] !== undefined) {
-             handleAutoScale();
+        // Ignoriamo l'autorange (il doppio click)
+        if (eventdata['xaxis.autorange']) return;
+
+        // Se l'utente ha mosso o zoomato l'asse X
+        if (eventdata['xaxis.range[0]'] !== undefined) {
+            clearTimeout(resizeTimer);
+            // Aspettiamo che l'utente finisca di fare pinch (150 millisecondi) prima di riadattare la Y
+            resizeTimer = setTimeout(() => {
+                handleAutoScale();
+            }, 150);
         }
     });
 
-    // Reset totale
+    // Reset totale al doppio click (su mobile è un doppio tap)
     chartDiv.on('plotly_doubleclick', () => {
         setTimeout(() => {
             showTotalReport();
