@@ -430,12 +430,12 @@
 
     // --- INIZIALIZZAZIONE ---
     Plotly.newPlot(chartDiv, traces, { 
-        dragmode: 'pan', showlegend: true, legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' }, 
+        showlegend: true, legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' }, 
         margin: { l: 40, r: 15, t: 10, b: 80 }, plot_bgcolor: '#ffffff', 
         xaxis: { gridcolor: '#f0f2f5', type: 'linear', dtick: 2, tickformat: 'd', autorange: true }, 
         yaxis: { gridcolor: '#f0f2f5', ticksuffix: '%', autorange: true }, 
         shapes: baseShapes,
-        uirevision: 'true' // IMPORTANTE: Mantiene lo stato dell'UI durante i ricalcoli
+        uirevision: 'true' 
     }, {responsive: true, scrollZoom: true, displayModeBar: false});
     
     showTotalReport();
