@@ -80,10 +80,10 @@
         /* Evoluzione Storica: Plotly su desktop, Chart.js su mobile */
         @media (max-width: 768px) {
             #chart { display: none !important; }
-            #mobileChart { display: block !important; }
+            #mobileChartWrap { display: block !important; }
         }
         @media (min-width: 769px) {
-            #mobileChart { display: none !important; }
+            #mobileChartWrap { display: none !important; }
         }
 
     </style>
@@ -146,7 +146,9 @@
                 <h1>Evoluzione Storica</h1>
             </div>
             <div id="chart"></div>
-            <canvas id="mobileChart" style="display:none; width:100%; height:340px;"></canvas>
+            <div id="mobileChartWrap" style="display:none; position:relative; height:340px; width:100%;">
+                <canvas id="mobileChart"></canvas>
+            </div>
         </div>
         <div class="side-panel">
             <div id="reportContent"></div>
