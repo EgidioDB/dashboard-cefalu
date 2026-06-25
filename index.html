@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cefalù Tourism Dashboard - Advanced Analytics</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <style>
         :root {
@@ -84,6 +84,58 @@
             #mobileChartWrap { display: none !important; }
         }
 
+        /* ---- Info popup ---- */
+        .info-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 13px; height: 13px; border-radius: 50%;
+            background: transparent; color: var(--text-sub);
+            font-size: 8px; font-weight: 700; font-style: normal;
+            cursor: pointer; border: 1px solid var(--text-sub); padding: 0; margin-left: 5px;
+            vertical-align: middle; line-height: 1; flex-shrink: 0;
+            opacity: 0.55; transition: opacity .15s;
+        }
+        .info-btn:hover { opacity: 1; }
+
+        #infoOverlay {
+            display: none; position: fixed; z-index: 9999;
+            inset: 0; align-items: center; justify-content: center;
+        }
+        #infoOverlay.active { display: flex; }
+
+        #infoBackdrop {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        #infoBox {
+            position: relative; z-index: 1;
+            background: #fff; border-radius: 12px;
+            padding: 20px 18px 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+            max-width: 340px; width: calc(100% - 40px);
+            font-size: 0.82em; line-height: 1.55; color: var(--text-main);
+        }
+        #infoBox strong { display: block; margin-bottom: 8px; font-size: 1em; }
+        .info-fonte { display: block; margin-top: 13px; font-size: 0.82em; opacity: 0.55; font-style: italic; }
+        .data-row { cursor: pointer; border-radius: 3px; margin: 0 -4px; padding: 3px 4px; transition: background .1s; }
+        .data-row:hover { background: rgba(0,0,0,0.04); }
+        .data-row.dr-open { background: rgba(69,123,157,0.1); border-radius: 3px 3px 0 0; }
+        .nominal-row { font-size: 0.76em; color: var(--text-sub); line-height: 1.5; margin: 0 -4px 2px; border-bottom: 1px dashed rgba(0,0,0,0); max-height: 0; overflow: hidden; opacity: 0; padding: 0 4px; transition: max-height 0.28s ease, opacity 0.22s ease, padding 0.28s ease, border-color 0.28s ease; }
+        .nominal-row.nom-open { max-height: 300px; opacity: 1; padding: 7px 4px 9px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+        .nom-r { display:flex; justify-content:space-between; gap:8px; margin-bottom:5px; }
+        .nom-r b { color:var(--text-main); font-weight:600; white-space:nowrap; }
+        #infoClose {
+            position: absolute; top: 10px; right: 12px;
+            background: none; border: none; font-size: 1.3em;
+            cursor: pointer; color: var(--text-sub); line-height: 1;
+        }
+        @media (max-width: 768px) {
+            #infoBox {
+                max-width: 100%; width: calc(100% - 40px);
+                font-size: 0.95em; padding: 24px 20px 20px;
+                border-radius: 16px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -93,7 +145,7 @@
     <div class="dashboard-row row-donuts">
         <div class="main-panel" style="flex: 0 100%;">
             <div class="header-box">
-                <h1>Analisi Volumi Presenze<br class="no-display"> (Notti totali)</h1>
+                <h1>Analisi Volumi Presenze<br class="no-display"> (Notti totali) <button class="info-btn" onclick="showInfo('chart_donuts')">i</button></h1>
             </div>
             <div class="donut-container">
                 <div id="donut-total" class="donut-box"></div>
@@ -106,7 +158,7 @@
     <div class="dashboard-row row-map">
         <div class="main-panel">
             <div class="header-box">
-                <h1>Analisi Geografica</h1>
+                <h1>Analisi Geografica <button class="info-btn" onclick="showInfo('chart_map')">i</button></h1>
                 <p style="color:var(--text-sub); font-size: 0.75em; margin:0;">Click sulla regione per filtrare tutti i report</p>
             </div>
             <div class="map-wrapper">
@@ -141,7 +193,7 @@
     <div class="dashboard-row row-chart">
         <div class="main-panel">
             <div class="header-box">
-                <h1>Evoluzione Storica</h1>
+                <h1>Evoluzione Storica <button class="info-btn" onclick="showInfo('chart_evol')">i</button></h1>
             </div>
             <div id="chart"></div>
             <div id="mobileChartWrap" style="display:none; position:relative; height:340px; width:100%;">
@@ -155,20 +207,20 @@
 
     <div class="dashboard-row" style="height: auto; margin-top: 15px;">
         <div class="main-panel" style="flex: 1;">
-            <div class="header-box"><h1>Stagionalità (Notti 2024)</h1></div>
+            <div class="header-box"><h1>Stagionalità (Notti 2024) <button class="info-btn" onclick="showInfo('chart_seasonality')">i</button></h1></div>
             <div id="chart-seasonality" style="height: 320px;"></div> </div>
         <div class="main-panel" style="flex: 1;">
-            <div class="header-box"><h1>Origine (Ita vs Estero)</h1></div>
+            <div class="header-box"><h1>Origine (Ita vs Estero) <button class="info-btn" onclick="showInfo('chart_origin')">i</button></h1></div>
             <div id="chart-origin" style="height: 320px;"></div> </div>
     </div>
 
     <div class="dashboard-row" style="height: auto; margin-top: 15px;">
         <div class="main-panel" style="flex: 1;">
-            <div class="header-box"><h1>Permanenza Media (Giorni)</h1></div>
+            <div class="header-box"><h1>Permanenza Media (Giorni) <button class="info-btn" onclick="showInfo('chart_alos')">i</button></h1></div>
             <div id="chart-alos" style="height: 320px;"></div> </div>
         <div class="main-panel" style="flex: 1;">
             <div class="header-box">
-                <h1>Classifica di Crescita Nazionale</h1>
+                <h1>Classifica di Crescita Nazionale <button class="info-btn" onclick="showInfo('chart_ranking')">i</button></h1>
                 <p style="font-size:0.75em; margin:0; color: var(--text-sub);">Comuni con presenze >500k (Confronto 2014 vs 2024)</p>
             </div>
             <div id="leaderboard-content" style="margin-top: 20px;"></div>
@@ -205,26 +257,26 @@
     // --- 2. DATABASE REPORT REGIONALI ---
     const itBenchmark = { arr: 131.1, pre: 123.4, ext: 148.4 };
     const regionalDataFull = {
-        "Abruzzo":        { reg: { preArr: +15.2, prePre: +20.3, preExt:  +0.0, arr: 128.2, pre: 114.2, alb: 117.0, ext: 116.6 }, top: { name: "Pescara",                        preArr:   +43.4, prePre:   +16.9, preAlb:   +7.1, preExt: +172.5, arr: 125.0, pre: 228.7, alb: 121.3, ext: 116.6 } },
-        "Basilicata":     { reg: { preArr: -19.5, prePre: -11.3, preExt:  +0.0, arr: 153.9, pre: 119.6, alb: 126.6, ext: 119.9 }, top: { name: "Matera",                          preArr:  +153.7, prePre:  +198.3, preAlb: +120.4, preExt: +390.4, arr: 249.1, pre: 239.5, alb: 184.5, ext: 374.9 } },
-        "Calabria":       { reg: { preArr:  +8.9, prePre:  +9.4, preExt:  +0.0, arr: 124.8, pre: 104.9, alb: 110.9, ext: 128.1 }, top: { name: "Simeri Crichi",                  preArr:   null,  prePre:   null,  preAlb:  null,  preExt:  null,  arr: 492.5, pre: 301.4, alb:  null, ext: 128.1 } },
-        "Campania":       { reg: { preArr:  -3.3, prePre:  +3.7, preExt:  +0.0, arr: 132.7, pre: 118.3, alb: 113.3, ext: 151.6 }, top: { name: "Giugliano in Campania",          preArr:   null,  prePre:   null,  preAlb: +229.5, preExt:  null,  arr: 130.3, pre: 390.0, alb: 390.0, ext: 151.6 } },
-        "Emilia-Romagna": { reg: { preArr:  -4.7, prePre:  +8.4, preExt:  +0.0, arr: 129.2, pre: 115.3, alb: 105.5, ext: 155.0 }, top: { name: "Castenaso",                      preArr:  +244.9, prePre:  +309.7, preAlb: +319.5, preExt: +182.9, arr: 274.4, pre: 358.0, alb: 353.7, ext: 413.2 } },
-        "Friuli":         { reg: { preArr:  -5.8, prePre: +16.7, preExt:  +0.0, arr: 146.6, pre: 133.4, alb: 142.3, ext: 126.6 }, top: { name: "San Dorligo della Valle-Dolina", preArr:   null,  prePre:   null,  preAlb:  null,  preExt:  null,  arr: 165.3, pre: 557.2, alb: 582.2, ext: 333.8 } },
-        "Lazio":          { reg: { preArr:  +2.7, prePre:  +2.8, preExt:  +0.0, arr: 123.3, pre: 168.0, alb: 139.6, ext: 344.0 }, top: { name: "Santa Marinella",                preArr:  +461.3, prePre:  +384.4, preAlb: +401.9, preExt: +330.8, arr: 633.3, pre: 686.1, alb: 684.9, ext: 344.0 } },
-        "Liguria":        { reg: { preArr: -11.1, prePre:  +4.9, preExt:  +0.0, arr: 127.4, pre: 119.7, alb: 102.2, ext: 168.6 }, top: { name: "La Spezia",                      preArr:   +69.2, prePre:   +90.3, preAlb:  +11.9, preExt: +296.9, arr: 211.3, pre: 252.6, alb: 128.9, ext: 168.6 } },
-        "Lombardia":      { reg: { preArr: -23.5, prePre: -17.5, preExt:  +0.0, arr: 132.2, pre: 131.6, alb: 121.2, ext: 220.3 }, top: { name: "Vimercate",                      preArr: +1291.6, prePre: +1043.0, preAlb:+1228.1, preExt:  +73.3, arr:1199.0, pre: 993.0, alb:1153.4, ext: 152.6 } },
-        "Marche":         { reg: { preArr:  -8.6, prePre:  +1.1, preExt:  +0.0, arr: 116.0, pre:  92.3, alb:  95.4, ext:  89.4 }, top: { name: "Mondolfo",                       preArr:   +86.8, prePre:  +108.3, preAlb: +157.4, preExt:  +66.5, arr: 208.5, pre: 217.8, alb: 306.0, ext: 142.6 } },
-        "Molise":         { reg: { preArr: +32.8, prePre: +57.1, preExt:  +0.0, arr:  94.0, pre: 108.7, alb:  92.3, ext: 174.2 }, top: { name: "Termoli",                        preArr:   +17.6, prePre:    +6.8, preAlb:   +4.7, preExt:   +9.7, arr: 104.7, pre: 101.8, alb:  95.8, ext: 110.1 } },
-        "Piemonte":       { reg: { preArr: -21.8, prePre: -11.5, preExt:  +0.0, arr: 124.4, pre: 110.2, alb: 105.2, ext: 135.9 }, top: { name: "Alagna Valsesia",                preArr:  +191.4, prePre:  +223.8, preAlb: +253.4, preExt: +211.7, arr: 318.4, pre: 360.8, alb: 485.2, ext: 310.2 } },
-        "Puglia":         { reg: { preArr: -10.7, prePre:  -8.2, preExt:  +0.0, arr: 156.1, pre: 134.8, alb: 118.5, ext: 166.7 }, top: { name: "Monopoli",                       preArr:  +126.9, prePre:  +110.1, preAlb:  +67.1, preExt: +251.1, arr: 334.2, pre: 290.3, alb: 189.7, ext: 166.7 } },
-        "Sardegna":       { reg: { preArr:  -1.1, prePre:  +8.2, preExt:  +0.0, arr: 161.9, pre: 137.4, alb: 121.4, ext: 188.4 }, top: { name: "Sassari",                        preArr:   +36.0, prePre:   +46.3, preAlb:  +37.1, preExt: +366.6, arr: 147.8, pre: 212.7, alb: 186.8, ext: 188.4 } },
-        "Sicilia":        { reg: { preArr:  -9.0, prePre:  -6.2, preExt:  +0.0, arr: 125.5, pre: 116.7, alb: 101.3, ext: 169.0 }, top: { name: "Gioiosa Marea",                  preArr:   +53.7, prePre:   +37.8, preAlb:  -20.8, preExt: +147.2, arr: 230.8, pre: 472.1, alb: 551.9, ext: 323.1 } },
-        "Toscana":        { reg: { preArr: -12.3, prePre:  -4.4, preExt:  +0.0, arr: 121.3, pre: 107.1, alb:  92.2, ext: 123.9 }, top: { name: "Castiglion Fiorentino",          preArr:   +74.8, prePre:   +79.9, preAlb:  +82.9, preExt:  +76.4, arr: 238.6, pre: 233.9, alb: 211.0, ext: 261.4 } },
-        "Trentino":       { reg: { preArr: -12.3, prePre:  -2.8, preExt:  +0.0, arr: 142.0, pre: 129.4, alb: 127.0, ext: 162.8 }, top: { name: "Commezzadura",                  preArr:   +66.7, prePre:   +59.5, preAlb:  +62.0, preExt:  +40.2, arr: 149.9, pre: 159.0, alb: 154.6, ext: 193.2 } },
-        "Umbria":         { reg: { preArr:  -7.6, prePre:  +2.6, preExt:  +0.0, arr: 113.2, pre: 115.2, alb: 109.4, ext: 122.2 }, top: { name: "Foligno",                        preArr:   +21.6, prePre:   +10.4, preAlb:   -1.7, preExt:  +46.4, arr: 120.6, pre: 137.3, alb: 115.5, ext: 202.1 } },
-        "Valle d'Aosta":  { reg: { preArr: -13.0, prePre:  +4.3, preExt:  +0.0, arr: 136.2, pre: 123.7, alb: 121.0, ext: 144.4 }, top: { name: "Gressan",                        preArr:   +39.5, prePre:   +38.8, preAlb:  +45.5, preExt:   +4.5, arr: 141.4, pre: 155.8, alb: 170.7, ext: 144.4 } },
-        "Veneto":         { reg: { preArr: -13.1, prePre:  -2.0, preExt:  +0.0, arr: 133.8, pre: 118.8, alb: 104.1, ext: 135.7 }, top: { name: "Caprino Veronese",               preArr:  +146.9, prePre:   +79.8, preAlb: +104.0, preExt:  +57.9, arr: 350.0, pre: 265.3, alb: 281.1, ext: 251.1 } }
+        "Abruzzo":        { reg: { preArr: +15.2, prePre: +20.3, preExt:  +0.0, arr: 128.2, pre: 114.2, alb: 117.0, ext: 116.6, covid: { arr: +16.4, pre:  -1.7, alb:   0.0, ext:  -8.0 } }, top: { name: "Pescara",                        preArr:   +43.4, prePre:   +16.9, preAlb:   +7.1, preExt: +172.5, arr: 125.0, pre: 228.7, alb: 121.3, ext: 116.6 } },
+        "Basilicata":     { reg: { preArr: -19.5, prePre: -11.3, preExt:  +0.0, arr: 153.9, pre: 119.6, alb: 126.6, ext: 119.9, covid: { arr: +63.0, pre: +30.2, alb: +30.7, ext: +31.3 } }, top: { name: "Matera",                          preArr:  +153.7, prePre:  +198.3, preAlb: +120.4, preExt: +390.4, arr: 249.1, pre: 239.5, alb: 184.5, ext: 374.9 } },
+        "Calabria":       { reg: { preArr:  +8.9, prePre:  +9.4, preExt:  +0.0, arr: 124.8, pre: 104.9, alb: 110.9, ext: 128.1, covid: { arr: +35.2, pre: +22.5, alb: +20.5, ext: +16.6 } }, top: { name: "Simeri Crichi",                  preArr:   null,  prePre:   null,  preAlb:  null,  preExt:  null,  arr: 492.5, pre: 301.4, alb:  null, ext: 128.1 } },
+        "Campania":       { reg: { preArr:  -3.3, prePre:  +3.7, preExt:  +0.0, arr: 132.7, pre: 118.3, alb: 113.3, ext: 151.6, covid: { arr: +35.5, pre: +21.9, alb: +15.9, ext: +51.1 } }, top: { name: "Giugliano in Campania",          preArr:   null,  prePre:   null,  preAlb: +229.5, preExt:  null,  arr: 130.3, pre: 390.0, alb: 390.0, ext: 151.6 } },
+        "Emilia-Romagna": { reg: { preArr:  -4.7, prePre:  +8.4, preExt:  +0.0, arr: 129.2, pre: 115.3, alb: 105.5, ext: 155.0, covid: { arr: +26.1, pre: +14.1, alb:  +9.7, ext: +22.8 } }, top: { name: "Castenaso",                      preArr:  +244.9, prePre:  +309.7, preAlb: +319.5, preExt: +182.9, arr: 274.4, pre: 358.0, alb: 353.7, ext: 413.2 } },
+        "Friuli":         { reg: { preArr:  -5.8, prePre: +16.7, preExt:  +0.0, arr: 146.6, pre: 133.4, alb: 142.3, ext: 126.6, covid: { arr: +27.8, pre: +19.0, alb: +15.4, ext: +15.4 } }, top: { name: "San Dorligo della Valle-Dolina", preArr:   null,  prePre:   null,  preAlb:  null,  preExt:  null,  arr: 165.3, pre: 557.2, alb: 582.2, ext: 333.8 } },
+        "Lazio":          { reg: { preArr:  +2.7, prePre:  +2.8, preExt:  +0.0, arr: 123.3, pre: 168.0, alb: 139.6, ext: 344.0, covid: { arr: +24.0, pre: +26.7, alb:  +5.8, ext:+150.4 } }, top: { name: "Santa Marinella",                preArr:  +461.3, prePre:  +384.4, preAlb: +401.9, preExt: +330.8, arr: 633.3, pre: 686.1, alb: 684.9, ext: 344.0 } },
+        "Liguria":        { reg: { preArr: -11.1, prePre:  +4.9, preExt:  +0.0, arr: 127.4, pre: 119.7, alb: 102.2, ext: 168.6, covid: { arr: +18.0, pre: +11.9, alb:  +4.1, ext: +31.7 } }, top: { name: "La Spezia",                      preArr:   +69.2, prePre:   +90.3, preAlb:  +11.9, preExt: +296.9, arr: 211.3, pre: 252.6, alb: 128.9, ext: 168.6 } },
+        "Lombardia":      { reg: { preArr: -23.5, prePre: -17.5, preExt:  +0.0, arr: 132.2, pre: 131.6, alb: 121.2, ext: 220.3, covid: { arr: +24.3, pre: +18.0, alb: +15.1, ext: +41.9 } }, top: { name: "Vimercate",                      preArr: +1291.6, prePre: +1043.0, preAlb:+1228.1, preExt:  +73.3, arr:1199.0, pre: 993.0, alb:1153.4, ext: 152.6 } },
+        "Marche":         { reg: { preArr:  -8.6, prePre:  +1.1, preExt:  +0.0, arr: 116.0, pre:  92.3, alb:  95.4, ext:  89.4, covid: { arr:  +6.8, pre:  -8.7, alb: -11.3, ext:  -6.3 } }, top: { name: "Mondolfo",                       preArr:   +86.8, prePre:  +108.3, preAlb: +157.4, preExt:  +66.5, arr: 208.5, pre: 217.8, alb: 306.0, ext: 142.6 } },
+        "Molise":         { reg: { preArr: +32.8, prePre: +57.1, preExt:  +0.0, arr:  94.0, pre: 108.7, alb:  92.3, ext: 174.2, covid: { arr:  -7.0, pre:  +4.8, alb: -30.2, ext: +23.9 } }, top: { name: "Termoli",                        preArr:   +17.6, prePre:    +6.8, preAlb:   +4.7, preExt:   +9.7, arr: 104.7, pre: 101.8, alb:  95.8, ext: 110.1 } },
+        "Piemonte":       { reg: { preArr: -21.8, prePre: -11.5, preExt:  +0.0, arr: 124.4, pre: 110.2, alb: 105.2, ext: 135.9, covid: { arr: +20.6, pre: +14.0, alb:  +1.0, ext: +38.7 } }, top: { name: "Alagna Valsesia",                preArr:  +191.4, prePre:  +223.8, preAlb: +253.4, preExt: +211.7, arr: 318.4, pre: 360.8, alb: 485.2, ext: 310.2 } },
+        "Puglia":         { reg: { preArr: -10.7, prePre:  -8.2, preExt:  +0.0, arr: 156.1, pre: 134.8, alb: 118.5, ext: 166.7, covid: { arr: +30.2, pre: +16.3, alb: +11.8, ext: +20.7 } }, top: { name: "Monopoli",                       preArr:  +126.9, prePre:  +110.1, preAlb:  +67.1, preExt: +251.1, arr: 334.2, pre: 290.3, alb: 189.7, ext: 166.7 } },
+        "Sardegna":       { reg: { preArr:  -1.1, prePre:  +8.2, preExt:  +0.0, arr: 161.9, pre: 137.4, alb: 121.4, ext: 188.4, covid: { arr: +44.0, pre: +33.3, alb: +26.4, ext: +49.5 } }, top: { name: "Sassari",                        preArr:   +36.0, prePre:   +46.3, preAlb:  +37.1, preExt: +366.6, arr: 147.8, pre: 212.7, alb: 186.8, ext: 188.4 } },
+        "Sicilia":        { reg: { preArr:  -9.0, prePre:  -6.2, preExt:  +0.0, arr: 125.5, pre: 116.7, alb: 101.3, ext: 169.0, covid: { arr: +10.8, pre:  +1.7, alb:  -4.6, ext: +15.2 } }, top: { name: "Gioiosa Marea",                  preArr:   +53.7, prePre:   +37.8, preAlb:  -20.8, preExt: +147.2, arr: 230.8, pre: 472.1, alb: 551.9, ext: 323.1 } },
+        "Toscana":        { reg: { preArr: -12.3, prePre:  -4.4, preExt:  +0.0, arr: 121.3, pre: 107.1, alb:  92.2, ext: 123.9, covid: { arr: +15.8, pre: +11.4, alb:  +5.3, ext: +19.1 } }, top: { name: "Castiglion Fiorentino",          preArr:   +74.8, prePre:   +79.9, preAlb:  +82.9, preExt:  +76.4, arr: 238.6, pre: 233.9, alb: 211.0, ext: 261.4 } },
+        "Trentino":       { reg: { preArr: -12.3, prePre:  -2.8, preExt:  +0.0, arr: 142.0, pre: 129.4, alb: 127.0, ext: 162.8, covid: { arr: +26.8, pre: +18.9, alb: +20.1, ext: +33.2 } }, top: { name: "Commezzadura",                  preArr:   +66.7, prePre:   +59.5, preAlb:  +62.0, preExt:  +40.2, arr: 149.9, pre: 159.0, alb: 154.6, ext: 193.2 } },
+        "Umbria":         { reg: { preArr:  -7.6, prePre:  +2.6, preExt:  +0.0, arr: 113.2, pre: 115.2, alb: 109.4, ext: 122.2, covid: { arr:  +5.0, pre:  +0.5, alb:  -1.7, ext:  +1.8 } }, top: { name: "Foligno",                        preArr:   +21.6, prePre:   +10.4, preAlb:   -1.7, preExt:  +46.4, arr: 120.6, pre: 137.3, alb: 115.5, ext: 202.1 } },
+        "Valle d'Aosta":  { reg: { preArr: -13.0, prePre:  +4.3, preExt:  +0.0, arr: 136.2, pre: 123.7, alb: 121.0, ext: 144.4, covid: { arr: +28.8, pre: +21.4, alb: +13.6, ext: +32.4 } }, top: { name: "Gressan",                        preArr:   +39.5, prePre:   +38.8, preAlb:  +45.5, preExt:   +4.5, arr: 141.4, pre: 155.8, alb: 170.7, ext: 144.4 } },
+        "Veneto":         { reg: { preArr: -13.1, prePre:  -2.0, preExt:  +0.0, arr: 133.8, pre: 118.8, alb: 104.1, ext: 135.7, covid: { arr: +24.2, pre: +15.2, alb:  +9.6, ext: +20.7 } }, top: { name: "Caprino Veronese",               preArr:  +146.9, prePre:   +79.8, preAlb: +104.0, preExt:  +57.9, arr: 350.0, pre: 265.3, alb: 281.1, ext: 251.1 } }
     };
 
     // --- 3. FORMATTAZIONE NUMERI ---
@@ -294,21 +346,42 @@
     }
 
     function showTotalRegionalReport() {
+        // Valori assoluti IT per anni chiave
+        const i04 = { pre: Math.round(rawData.itPre[0]/100*IT_PRE_BASE), ext: Math.round(rawData.itExt[0]/100*IT_EXT_BASE) };
+        i04.alb = i04.pre - i04.ext;
+        const i19 = { pre: Math.round(rawData.itPre[15]/100*IT_PRE_BASE), ext: Math.round(rawData.itExt[15]/100*IT_EXT_BASE) };
+        i19.alb = i19.pre - i19.ext;
+        const i24 = { pre: Math.round(rawData.itPre[20]/100*IT_PRE_BASE), ext: Math.round(rawData.itExt[20]/100*IT_EXT_BASE) };
+        i24.alb = i24.pre - i24.ext;
         document.getElementById('regionReportContent').innerHTML = `
             <div class="report-title">Sintesi Italia 2004-2024</div>
             <div class="data-group">
-                <div class="group-label">Pre-2012</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">+17.1%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">+9.2%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value">${sgn(itAlb[0]-100)}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">+10.8%</span></div>
+                <div class="group-label">Pre-2012 ${ib('pre2012_nat')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004 (indice)</span><b>${rawData.itArr[0].toFixed(1)}</b></div><div class='nom-r'><span>2012 (base)</span><b>100</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">+17.1%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${nf(i04.pre)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(IT_PRE_BASE)} notti</b></div>"><span>Presenze</span><span class="value">+9.2%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${nf(i04.alb)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(IT_ALB_BASE)} notti</b></div>"><span>Alb ${ib('alb_it')}</span><span class="value">${sgn(itAlb[0]-100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${nf(i04.ext)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(IT_EXT_BASE)} notti</b></div>"><span>Extra-Alb</span><span class="value">+10.8%</span></div>
             </div>
             <div class="data-group">
-                <div class="group-label" style="color:var(--accent)">Post-2012</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">+34.6%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">+22.4%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value">${sgn(itAlb[20]-100)}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">+45.7%</span></div>
+                <div class="group-label" style="color:var(--accent)">Post-2012 ${ib('post2012_nat')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>100</b></div><div class='nom-r'><span>2024 (indice)</span><b>${rawData.itArr[20].toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">+34.6%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(IT_PRE_BASE)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(i24.pre)} notti</b></div>"><span>Presenze</span><span class="value">+22.4%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(IT_ALB_BASE)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(i24.alb)} notti</b></div>"><span>Alb ${ib('alb_it')}</span><span class="value">${sgn(itAlb[20]-100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(IT_EXT_BASE)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(i24.ext)} notti</b></div>"><span>Extra-Alb</span><span class="value">+45.7%</span></div>
+            </div>
+            <div class="data-group">
+                <div class="group-label">Pre-COVID (2019 vs 2012) ${ib('preCovid_nat')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>100</b></div><div class='nom-r'><span>2019 (indice)</span><b>${rawData.itArr[15].toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${sgn(rawData.itArr[15]-100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(IT_PRE_BASE)} notti</b></div><div class='nom-r'><span>2019</span><b>${nf(i19.pre)} notti</b></div>"><span>Presenze</span><span class="value">${sgn(rawData.itPre[15]-100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(IT_ALB_BASE)} notti</b></div><div class='nom-r'><span>2019</span><b>${nf(i19.alb)} notti</b></div>"><span>Alb ${ib('alb_it')}</span><span class="value">${sgn(itAlb[15]-100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(IT_EXT_BASE)} notti</b></div><div class='nom-r'><span>2019</span><b>${nf(i19.ext)} notti</b></div>"><span>Extra-Alb</span><span class="value">${sgn(rawData.itExt[15]-100)}%</span></div>
+            </div>
+            <div class="data-group">
+                <div class="group-label" style="color:#457b9d">Post-COVID (2024 vs 2019) ${ib('postCovid_nat')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019 (indice)</span><b>${rawData.itArr[15].toFixed(1)}</b></div><div class='nom-r'><span>2024 (indice)</span><b>${rawData.itArr[20].toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${sgn((rawData.itArr[20]/rawData.itArr[15]-1)*100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019</span><b>${nf(i19.pre)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(i24.pre)} notti</b></div>"><span>Presenze</span><span class="value">${sgn((rawData.itPre[20]/rawData.itPre[15]-1)*100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019</span><b>${nf(i19.alb)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(i24.alb)} notti</b></div>"><span>Alb ${ib('alb_it')}</span><span class="value">${sgn((itAlb[20]/itAlb[15]-1)*100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019</span><b>${nf(i19.ext)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(i24.ext)} notti</b></div>"><span>Extra-Alb</span><span class="value">${sgn((rawData.itExt[20]/rawData.itExt[15]-1)*100)}%</span></div>
             </div>`;
     }
 
@@ -345,37 +418,71 @@
                 const data = regionalDataFull[name];
                 const gapArr = (data.top.arr - itBenchmark.arr).toFixed(1);
                 const gapPre = (data.top.pre - itBenchmark.pre).toFixed(1);
+                // Post-COVID regione: deriva 2019 dal covid (% vs 2014) e 2024 già disponibile
+                const pcRegArr = sgn((data.reg.arr / (100 + data.reg.covid.arr) - 1) * 100);
+                const pcRegPre = sgn((data.reg.pre / (100 + data.reg.covid.pre) - 1) * 100);
+                const pcRegAlb = sgn((data.reg.alb / (100 + data.reg.covid.alb) - 1) * 100);
+                const pcRegExt = sgn((data.reg.ext / (100 + data.reg.covid.ext) - 1) * 100);
+                // Post-COVID Top City
+                const topHasPreCovid = data.top.preArr !== null;
+                const pcTopArr = topHasPreCovid ? sgn((data.top.arr / (100 + data.top.preArr) - 1) * 100) : null;
+                const pcTopPre = topHasPreCovid ? sgn((data.top.pre / (100 + data.top.prePre) - 1) * 100) : null;
+                const pcTopAlb = (topHasPreCovid && data.top.preAlb !== null && data.top.alb !== null) ? sgn((data.top.alb / (100 + data.top.preAlb) - 1) * 100) : null;
+                const pcTopExt = topHasPreCovid ? sgn((data.top.ext / (100 + data.top.preExt) - 1) * 100) : null;
 
                 document.getElementById('regionReportContent').innerHTML = `
                     <div class="report-title">${name}</div>
                     <div class="data-group">
-                        <div class="group-label">Regione: Pre-2012</div>
-                        <div class="data-row"><span>Arrivi</span><span class="value">${data.reg.preArr}%</span></div>
-                        <div class="data-row"><span>Presenze</span><span class="value">${data.reg.prePre}%</span></div>
-                        <div class="data-row"><span>Extra-Alb</span><span class="value">${data.reg.preExt}%</span></div>
-                        <div class="group-label" style="color:var(--accent); margin-top:10px">Regione: Post-2012</div>
-                        <div class="data-row"><span>Arrivi</span><span class="value">${fmt(data.reg.arr)}%</span></div>
-                        <div class="data-row"><span>Presenze</span><span class="value">${fmt(data.reg.pre)}%</span></div>
-                        <div class="data-row"><span>Alb</span><span class="value">${fmt(data.reg.alb)}%</span></div>
-                        <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.reg.ext)}%</span></div>
+                        <div class="group-label">Regione: Pre-2012 ${ib('pre2012_nat')}</div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${data.reg.preArr}%</b></div><div class='nom-r'><span>2012 (base)</span><b>100</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${data.reg.preArr}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${data.reg.prePre}%</b></div><div class='nom-r'><span>2012 (base)</span><b>100</b></div>"><span>Presenze</span><span class="value">${data.reg.prePre}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${data.reg.preExt}%</b></div><div class='nom-r'><span>2012 (base)</span><b>100</b></div>"><span>Extra-Alb</span><span class="value">${data.reg.preExt}%</span></div>
+                    </div>
+                    <div class="data-group">
+                        <div class="group-label" style="color:var(--accent)">Regione: Post-2012 ${ib('reg_post2012')}</div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2014 (base)</span><b>100</b></div><div class='nom-r'><span>2024 (indice)</span><b>${data.reg.arr.toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${fmt(data.reg.arr)}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2014 (base)</span><b>100</b></div><div class='nom-r'><span>2024 (indice)</span><b>${data.reg.pre.toFixed(1)}</b></div>"><span>Presenze</span><span class="value">${fmt(data.reg.pre)}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2014 (base)</span><b>100</b></div><div class='nom-r'><span>2024 (indice)</span><b>${data.reg.alb.toFixed(1)}</b></div>"><span>Alb ${ib('alb_it')}</span><span class="value">${fmt(data.reg.alb)}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2014 (base)</span><b>100</b></div><div class='nom-r'><span>2024 (indice)</span><b>${data.reg.ext.toFixed(1)}</b></div>"><span>Extra-Alb</span><span class="value">${fmt(data.reg.ext)}%</span></div>
+                    </div>
+                    <div class="data-group">
+                        <div class="group-label">Regione: Pre-COVID (2019 vs 2014) ${ib('reg_preCovid')}</div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2014 (base)</span><b>100</b></div><div class='nom-r'><span>2019 (indice)</span><b>${(100+data.reg.covid.arr).toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${sgn(data.reg.covid.arr)}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2014 (base)</span><b>100</b></div><div class='nom-r'><span>2019 (indice)</span><b>${(100+data.reg.covid.pre).toFixed(1)}</b></div>"><span>Presenze</span><span class="value">${sgn(data.reg.covid.pre)}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2014 (base)</span><b>100</b></div><div class='nom-r'><span>2019 (indice)</span><b>${(100+data.reg.covid.alb).toFixed(1)}</b></div>"><span>Alb ${ib('alb_it')}</span><span class="value">${sgn(data.reg.covid.alb)}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2014 (base)</span><b>100</b></div><div class='nom-r'><span>2019 (indice)</span><b>${(100+data.reg.covid.ext).toFixed(1)}</b></div>"><span>Extra-Alb</span><span class="value">${sgn(data.reg.covid.ext)}%</span></div>
+                    </div>
+                    <div class="data-group">
+                        <div class="group-label" style="color:#457b9d">Regione: Post-COVID (2024 vs 2019) ${ib('postCovid_reg')}</div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019 (indice)</span><b>${(100+data.reg.covid.arr).toFixed(1)}</b></div><div class='nom-r'><span>2024 (indice)</span><b>${data.reg.arr.toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${pcRegArr}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019 (indice)</span><b>${(100+data.reg.covid.pre).toFixed(1)}</b></div><div class='nom-r'><span>2024 (indice)</span><b>${data.reg.pre.toFixed(1)}</b></div>"><span>Presenze</span><span class="value">${pcRegPre}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019 (indice)</span><b>${(100+data.reg.covid.alb).toFixed(1)}</b></div><div class='nom-r'><span>2024 (indice)</span><b>${data.reg.alb.toFixed(1)}</b></div>"><span>Alb ${ib('alb_it')}</span><span class="value">${pcRegAlb}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019 (indice)</span><b>${(100+data.reg.covid.ext).toFixed(1)}</b></div><div class='nom-r'><span>2024 (indice)</span><b>${data.reg.ext.toFixed(1)}</b></div>"><span>Extra-Alb</span><span class="value">${pcRegExt}%</span></div>
                     </div>
                     <div class="data-group" style="border-left: 4px solid #457b9d; background: #f0f7ff;">
                         <div class="group-label" style="color:#457b9d">Top City: ${data.top.name}</div>
-                        <div class="group-label" style="font-size:0.6em; margin-top:15px;">Pre-COVID (2019 vs 2014)</div>
+                        <div class="group-label" style="font-size:0.6em; margin-top:15px;">Pre-COVID (2019 vs 2014) ${ib('top_preCovid')}</div>
                         ${data.top.preArr === null
                             ? `<div class="data-row"><span style="color:var(--text-sub);font-style:italic;font-size:0.9em">Dati non disponibili per il 2019</span></div>`
-                            : `<div class="data-row"><span>Arrivi</span><span class="value">${data.top.preArr > 0 ? '+' : ''}${data.top.preArr}%</span></div>
+                            : `<div class="data-row"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${data.top.preArr > 0 ? '+' : ''}${data.top.preArr}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${data.top.prePre > 0 ? '+' : ''}${data.top.prePre}%</span></div>
                         ${data.top.preAlb === null ? '' : `<div class="data-row"><span>Alb</span><span class="value">${data.top.preAlb > 0 ? '+' : ''}${data.top.preAlb}%</span></div>`}
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${data.top.preExt > 0 ? '+' : ''}${data.top.preExt}%</span></div>`}
-                        <div class="group-label" style="font-size:0.6em; margin-top:15px; color:var(--accent)">Crescita totale (2024 vs 2014)</div>
-                        <div class="data-row"><span>Arrivi</span><span class="value">${fmt(data.top.arr)}%</span></div>
+                        <div class="group-label" style="font-size:0.6em; margin-top:15px; color:#457b9d">Post-COVID (2024 vs 2019) ${ib('postCovid_top')}</div>
+                        ${pcTopArr === null
+                            ? `<div class="data-row"><span style="color:var(--text-sub);font-style:italic;font-size:0.9em">Dati non disponibili</span></div>`
+                            : `<div class="data-row"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${pcTopArr}%</span></div>
+                        <div class="data-row"><span>Presenze</span><span class="value">${pcTopPre}%</span></div>
+                        ${pcTopAlb === null ? '' : `<div class="data-row"><span>Alb</span><span class="value">${pcTopAlb}%</span></div>`}
+                        <div class="data-row"><span>Extra-Alb</span><span class="value">${pcTopExt}%</span></div>`}
+                        <div class="group-label" style="font-size:0.6em; margin-top:15px; color:var(--accent)">Crescita totale (2024 vs 2014) ${ib('top_post2014')}</div>
+                        <div class="data-row"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${fmt(data.top.arr)}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${fmt(data.top.pre)}%</span></div>
                         ${data.top.alb === null ? '' : `<div class="data-row"><span>Alb</span><span class="value">${fmt(data.top.alb)}%</span></div>`}
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.top.ext)}%</span></div>
-                        <div class="group-label" style="font-size:0.6em; margin-top:15px;">Gap vs IT (2024)</div>
-                        <div class="data-row"><span>Gap Arrivi</span><span class="value" style="color:${gapArr > 0 ? 'var(--accent)' : '#c0392b'}">${gapArr > 0 ? '+' : ''}${gapArr}%</span></div>
-                        <div class="data-row"><span>Gap Presenze</span><span class="value" style="color:${gapPre > 0 ? 'var(--accent)' : '#c0392b'}">${gapPre > 0 ? '+' : ''}${gapPre}%</span></div>
+                        <div class="group-label" style="font-size:0.6em; margin-top:15px;">Gap vs IT (2024) ${ib('top_gap')}</div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>Top City (indice 2024)</span><b>${data.top.arr.toFixed(1)}</b></div><div class='nom-r'><span>Media IT (indice 2024)</span><b>${itBenchmark.arr}</b></div>"><span>Gap Arrivi</span><span class="value" style="color:${gapArr > 0 ? 'var(--accent)' : '#c0392b'}">${gapArr > 0 ? '+' : ''}${gapArr}%</span></div>
+                        <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>Top City (indice 2024)</span><b>${data.top.pre.toFixed(1)}</b></div><div class='nom-r'><span>Media IT (indice 2024)</span><b>${itBenchmark.pre}</b></div>"><span>Gap Presenze</span><span class="value" style="color:${gapPre > 0 ? 'var(--accent)' : '#c0392b'}">${gapPre > 0 ? '+' : ''}${gapPre}%</span></div>
                     </div>`;
                 updateDonuts(name);
             }
@@ -437,7 +544,24 @@
         const extAbs = rawData.itExt[i] * IT_EXT_BASE / 100;
         return ((preAbs - extAbs) / IT_ALB_BASE) * 100;
     });
-    const sgn = v => v >= 0 ? '+' + v.toFixed(1) : v.toFixed(1); // helper segno esplicito
+    const sgn = v => v >= 0 ? '+' + v.toFixed(1) : v.toFixed(1);
+    const ib  = key => `<button class="info-btn" onclick="event.stopPropagation();showInfo('${key}')">i</button>`;
+    const nf = n => Math.round(n).toLocaleString('it-IT');
+    function toggleNominal(row) {
+        const sib = row.nextElementSibling;
+        if (sib && sib.classList.contains('nominal-row')) {
+            sib.classList.remove('nom-open');
+            row.classList.remove('dr-open');
+            sib.addEventListener('transitionend', () => sib.remove(), { once: true });
+            return;
+        }
+        const txt = row.dataset.nominal;
+        if (!txt) return;
+        const d = document.createElement('div');
+        d.className = 'nominal-row'; d.innerHTML = txt;
+        row.after(d); row.classList.add('dr-open');
+        requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add('nom-open')));
+    }
 
     const traces = [
         { x: years, y: rawData.cefPre.map(v=>v-100), name: 'Cef: Presenze',  line: {color: '#e63946', width: 3.5} },
@@ -456,46 +580,53 @@
 
     function showTotalReport() {
         currentHighlightYear = null;
-        const gA = (rawData.cefArr[20] - itBenchmark.arr).toFixed(1);
-        const gP = (rawData.cefPre[20] - itBenchmark.pre).toFixed(1);
-        const gE = (rawData.cefExt[20] - itBenchmark.ext).toFixed(1);
+        const gA = (rawData.cefArr[20] - rawData.itArr[20]).toFixed(1);
+        const gP = (rawData.cefPre[20] - rawData.itPre[20]).toFixed(1);
+        const gE = (rawData.cefExt[20] - rawData.itExt[20]).toFixed(1);
         const gAlb = (cefAlb[20] - itAlb[20]).toFixed(1);
+        // Valori assoluti Cefalù per anni chiave (presenze/ext/alb hanno base nota)
+        const c04 = { pre: Math.round(rawData.cefPre[0]/100*CEF_PRE_BASE), ext: Math.round(rawData.cefExt[0]/100*CEF_EXT_BASE) };
+        c04.alb = c04.pre - c04.ext;
+        const c19 = { pre: Math.round(rawData.cefPre[15]/100*CEF_PRE_BASE), ext: Math.round(rawData.cefExt[15]/100*CEF_EXT_BASE) };
+        c19.alb = c19.pre - c19.ext;
+        const c24 = { pre: Math.round(rawData.cefPre[20]/100*CEF_PRE_BASE), ext: Math.round(rawData.cefExt[20]/100*CEF_EXT_BASE) };
+        c24.alb = c24.pre - c24.ext;
         document.getElementById('reportContent').innerHTML = `
             <div class="report-title">Sintesi Cefalù 2004-2024</div>
             <div class="data-group">
-                <div class="group-label">Pre-2012</div>
-                <div class="data-row"><span>Arrivi</span><span class="value" style="color:#c0392b">${sgn(rawData.cefArr[0]-100)}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value" style="color:#c0392b">${sgn(rawData.cefPre[0]-100)}%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value" style="color:#c0392b">${sgn(cefAlb[0]-100)}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value" style="color:#c0392b">${sgn(rawData.cefExt[0]-100)}%</span></div>
+                <div class="group-label">Pre-2012 ${ib('pre2012_cef')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004 (indice)</span><b>${sgn(rawData.cefArr[0]-100)}%</b></div><div class='nom-r'><span>2012 base</span><b>100</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value" style="color:#c0392b">${sgn(rawData.cefArr[0]-100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${nf(c04.pre)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_PRE_BASE)} notti</b></div>"><span>Presenze</span><span class="value" style="color:#c0392b">${sgn(rawData.cefPre[0]-100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${nf(c04.alb)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_ALB_BASE)} notti</b></div>"><span>Alb ${ib('alb_cef')}</span><span class="value" style="color:#c0392b">${sgn(cefAlb[0]-100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2004</span><b>${nf(c04.ext)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_EXT_BASE)} notti</b></div>"><span>Extra-Alb</span><span class="value" style="color:#c0392b">${sgn(rawData.cefExt[0]-100)}%</span></div>
             </div>
             <div class="data-group">
-                <div class="group-label" style="color:var(--accent)">Post-2012</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.cefArr[20])}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[20])}%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value">${fmt(cefAlb[20])}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[20])}%</span></div>
+                <div class="group-label" style="color:var(--accent)">Post-2012 ${ib('post2012_cef')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>100</b></div><div class='nom-r'><span>2024 (indice)</span><b>${rawData.cefArr[20].toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${fmt(rawData.cefArr[20])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_PRE_BASE)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(c24.pre)} notti</b></div>"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[20])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_ALB_BASE)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(c24.alb)} notti</b></div>"><span>Alb ${ib('alb_cef')}</span><span class="value">${fmt(cefAlb[20])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_EXT_BASE)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(c24.ext)} notti</b></div>"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[20])}%</span></div>
             </div>
             <div class="data-group">
-                <div class="group-label">Pre-COVID (2019 vs 2012)</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.cefArr[15])}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[15])}%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value">${fmt(cefAlb[15])}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[15])}%</span></div>
+                <div class="group-label">Pre-COVID (2019 vs 2012) ${ib('preCovid_cef')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>100</b></div><div class='nom-r'><span>2019 (indice)</span><b>${rawData.cefArr[15].toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${fmt(rawData.cefArr[15])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_PRE_BASE)} notti</b></div><div class='nom-r'><span>2019</span><b>${nf(c19.pre)} notti</b></div>"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[15])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_ALB_BASE)} notti</b></div><div class='nom-r'><span>2019</span><b>${nf(c19.alb)} notti</b></div>"><span>Alb ${ib('alb_cef')}</span><span class="value">${fmt(cefAlb[15])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_EXT_BASE)} notti</b></div><div class='nom-r'><span>2019</span><b>${nf(c19.ext)} notti</b></div>"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[15])}%</span></div>
             </div>
             <div class="data-group">
-                <div class="group-label" style="color:#457b9d">Post-COVID (2024 vs 2019)</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">${sgn((rawData.cefArr[20]/rawData.cefArr[15]-1)*100)}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">${sgn((rawData.cefPre[20]/rawData.cefPre[15]-1)*100)}%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value">${sgn((cefAlb[20]/cefAlb[15]-1)*100)}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">${sgn((rawData.cefExt[20]/rawData.cefExt[15]-1)*100)}%</span></div>
+                <div class="group-label" style="color:#457b9d">Post-COVID (2024 vs 2019) ${ib('postCovid_cef')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019 (indice)</span><b>${rawData.cefArr[15].toFixed(1)}</b></div><div class='nom-r'><span>2024 (indice)</span><b>${rawData.cefArr[20].toFixed(1)}</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${sgn((rawData.cefArr[20]/rawData.cefArr[15]-1)*100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019</span><b>${nf(c19.pre)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(c24.pre)} notti</b></div>"><span>Presenze</span><span class="value">${sgn((rawData.cefPre[20]/rawData.cefPre[15]-1)*100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019</span><b>${nf(c19.alb)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(c24.alb)} notti</b></div>"><span>Alb ${ib('alb_cef')}</span><span class="value">${sgn((cefAlb[20]/cefAlb[15]-1)*100)}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>2019</span><b>${nf(c19.ext)} notti</b></div><div class='nom-r'><span>2024</span><b>${nf(c24.ext)} notti</b></div>"><span>Extra-Alb</span><span class="value">${sgn((rawData.cefExt[20]/rawData.cefExt[15]-1)*100)}%</span></div>
             </div>
             <div class="data-group">
-                <div class="group-label">Confronto Media Nazionale<br>al 2024</div>
-                <div class="data-row"><span>Arrivi</span><span class="value" style="color:var(--accent)">+${gA}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value" style="color:var(--accent)">+${gP}%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value" style="color:var(--accent)">${sgn(parseFloat(gAlb))}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value" style="color:var(--accent)">+${gE}%</span></div>
+                <div class="group-label">Confronto Media Nazionale<br>al 2024 ${ib('gap_nat')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>Cefalù (indice 2024)</span><b>${rawData.cefArr[20].toFixed(1)}</b></div><div class='nom-r'><span>Media IT (indice 2024)</span><b>${rawData.itArr[20].toFixed(1)}</b></div>"><span>Arrivi<span class="value" style="color:var(--accent)">+${gA}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>Cefalù 2024</span><b>${nf(c24.pre)} notti</b></div><div class='nom-r'><span>Cefalù indice</span><b>${rawData.cefPre[20].toFixed(1)}</b></div><div class='nom-r'><span>Media IT indice</span><b>${rawData.itPre[20].toFixed(1)}</b></div>"><span>Presenze</span><span class="value" style="color:var(--accent)">+${gP}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>Cefalù 2024</span><b>${nf(c24.alb)} notti</b></div><div class='nom-r'><span>Cefalù indice</span><b>${cefAlb[20].toFixed(1)}</b></div><div class='nom-r'><span>Media IT indice</span><b>${itAlb[20].toFixed(1)}</b></div>"><span>Alb ${ib('alb_cef')}</span><span class="value" style="color:var(--accent)">${sgn(parseFloat(gAlb))}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>Cefalù 2024</span><b>${nf(c24.ext)} notti</b></div><div class='nom-r'><span>Cefalù indice</span><b>${rawData.cefExt[20].toFixed(1)}</b></div><div class='nom-r'><span>Media IT indice</span><b>${rawData.itExt[20].toFixed(1)}</b></div>"><span>Extra-Alb</span><span class="value" style="color:var(--accent)">+${gE}%</span></div>
             </div>`;
         updateShapes();
     }
@@ -503,21 +634,26 @@
     function showYearlyReport(idx) {
         const anno = years[idx];
         currentHighlightYear = anno;
+        // Valori assoluti per l'anno selezionato
+        const cy = { pre: Math.round(rawData.cefPre[idx]/100*CEF_PRE_BASE), ext: Math.round(rawData.cefExt[idx]/100*CEF_EXT_BASE) };
+        cy.alb = cy.pre - cy.ext;
+        const iy = { pre: Math.round(rawData.itPre[idx]/100*IT_PRE_BASE), ext: Math.round(rawData.itExt[idx]/100*IT_EXT_BASE) };
+        iy.alb = iy.pre - iy.ext;
         document.getElementById('reportContent').innerHTML = `
             <div class="report-title">Dettaglio ${anno}</div>
             <div class="data-group">
-                <div class="group-label" style="color:var(--accent)">Cefalù</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.cefArr[idx])}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[idx])}%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value">${fmt(cefAlb[idx])}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[idx])}%</span></div>
+                <div class="group-label" style="color:var(--accent)">Cefalù ${ib('year_cef')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>${anno} (indice)</span><b>${rawData.cefArr[idx].toFixed(1)}</b></div><div class='nom-r'><span>2012 (base)</span><b>100</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${fmt(rawData.cefArr[idx])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>${anno}</span><b>${nf(cy.pre)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_PRE_BASE)} notti</b></div>"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[idx])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>${anno}</span><b>${nf(cy.alb)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_ALB_BASE)} notti</b></div>"><span>Alb ${ib('alb_cef')}</span><span class="value">${fmt(cefAlb[idx])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>${anno}</span><b>${nf(cy.ext)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(CEF_EXT_BASE)} notti</b></div>"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[idx])}%</span></div>
             </div>
             <div class="data-group" style="border-left: 4px solid #99aab5;">
-                <div class="group-label" style="color:#697386">Italia</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.itArr[idx])}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.itPre[idx])}%</span></div>
-                <div class="data-row"><span>Alb</span><span class="value">${fmt(itAlb[idx])}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.itExt[idx])}%</span></div>
+                <div class="group-label" style="color:#697386">Italia ${ib('year_it')}</div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>${anno} (indice)</span><b>${rawData.itArr[idx].toFixed(1)}</b></div><div class='nom-r'><span>2012 (base)</span><b>100</b></div>"><span>Arrivi ${ib('arr_indice')}</span><span class="value">${fmt(rawData.itArr[idx])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>${anno}</span><b>${nf(iy.pre)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(IT_PRE_BASE)} notti</b></div>"><span>Presenze</span><span class="value">${fmt(rawData.itPre[idx])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>${anno}</span><b>${nf(iy.alb)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(IT_ALB_BASE)} notti</b></div>"><span>Alb ${ib('alb_it')}</span><span class="value">${fmt(itAlb[idx])}%</span></div>
+                <div class="data-row" onclick="toggleNominal(this)" data-nominal="<div class='nom-r'><span>${anno}</span><b>${nf(iy.ext)} notti</b></div><div class='nom-r'><span>2012 (base)</span><b>${nf(IT_EXT_BASE)} notti</b></div>"><span>Extra-Alb</span><span class="value">${fmt(rawData.itExt[idx])}%</span></div>
             </div>`;
         updateShapes();
     }
@@ -536,6 +672,7 @@
         legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
         margin: { l: 40, r: 15, t: 10, b: 80 },
         plot_bgcolor: '#ffffff',
+        hovermode: 'x',
         xaxis: { gridcolor: '#f0f2f5', type: 'linear', dtick: 2, tickformat: 'd', fixedrange: false, autorange: true },
         yaxis: { gridcolor: '#f0f2f5', ticksuffix: '%', fixedrange: true },
         shapes: baseShapes
@@ -552,7 +689,17 @@
     // Eventi Hover e Click
     chartDiv.on('plotly_hover', (data) => updateShapes(data.points[0].x));
     chartDiv.on('plotly_unhover', () => updateShapes(null));
-    chartDiv.on('plotly_click', (data) => showYearlyReport(data.points[0].pointIndex));
+    chartDiv.addEventListener('click', function(e) {
+        const fl = chartDiv._fullLayout;
+        if (!fl || !fl.xaxis) return;
+        const bbox = chartDiv.getBoundingClientRect();
+        const xPixel = e.clientX - bbox.left - fl._size.l;
+        if (xPixel < 0 || xPixel > fl._size.w) return;
+        const xr = fl.xaxis.range;
+        const xValue = xr[0] + (xPixel / fl._size.w) * (xr[1] - xr[0]);
+        const yearIdx = Math.round(xValue) - 2004;
+        if (yearIdx >= 0 && yearIdx <= 20) showYearlyReport(yearIdx);
+    });
 
     // --- AUTO-SCALING ASSE Y ---
     let _autoScaleTimer = null;
@@ -878,6 +1025,83 @@
             </div>`;
     });
     document.getElementById('leaderboard-content').innerHTML = lbHtml;
+</script>
+
+<!-- Info popup overlay -->
+<div id="infoOverlay">
+    <div id="infoBackdrop" onclick="closeInfo()"></div>
+    <div id="infoBox">
+        <button id="infoClose" onclick="closeInfo()">✕</button>
+        <div id="infoText"></div>
+    </div>
+</div>
+
+<script>
+const INFO = {
+    pre2012_cef: "<strong>Pre-2012 — Cefalù (2004 vs 2012)</strong>Indice base 2012 = 100. Mostra la variazione % tra il 2004 (primo anno disponibile) e il 2012. Un valore negativo indica che Cefalù partiva da livelli inferiori al 2012; positivo che era già oltre. <em class='info-fonte'>Fonte: ISTAT, file Circoscrizioni Turistiche 2004-2013 + dati comunali 2014-2024.</em>",
+
+    post2012_cef: "<strong>Post-2012 — Cefalù (2024 vs 2012)</strong>Indice base 2012 = 100. Mostra la crescita % complessiva dal 2012 al 2024. Formula: (valore_2024 / valore_2012 − 1) × 100. <em class='info-fonte'>Fonte: ISTAT, file Circoscrizioni Turistiche 2004-2013 + dati comunali 2014-2024.</em>",
+
+    preCovid_cef: "<strong>Pre-COVID — Cefalù (2019 vs 2012)</strong>Indice base 2012 = 100. Variazione % dal 2012 al 2019, picco pre-pandemico. Misura quanto era cresciuto il turismo di Cefalù prima del COVID-19. <em class='info-fonte'>Fonte: ISTAT, file Circoscrizioni Turistiche + dati comunali.</em>",
+
+    postCovid_cef: "<strong>Post-COVID — Cefalù (2024 vs 2019)</strong>Variazione % dal 2019 al 2024. Formula: (valore_2024 / valore_2019 − 1) × 100. Misura il recupero post-pandemico e la crescita aggiuntiva rispetto al picco pre-COVID. <em class='info-fonte'>Fonte: ISTAT dati comunali 2014-2024.</em>",
+
+    gap_nat: "<strong>Confronto Media Nazionale al 2024</strong>Differenza in punti percentuali tra l'indice di Cefalù e l'indice nazionale al 2024 (entrambi base 2012 = 100). Un valore positivo indica che Cefalù ha cresciuto più della media italiana. Es: +20pp significa che l'indice Cefalù supera quello nazionale di 20 punti. <em class='info-fonte'>Fonte: ISTAT Serie Storiche nazionali + dati comunali.</em>",
+    arr_indice: "<strong>Perché gli Arrivi mostrano solo l'indice?</strong>Le presenze (notti) e l'extra-alberghiero hanno un valore assoluto di riferimento 2012 noto (634.776 notti per Cefalù, 380M per l'Italia): è quindi possibile calcolare valori nominali per ogni anno. Per gli <em>arrivi</em>, ISTAT non pubblica un conteggio assoluto comparabile nelle serie storiche 2004-2013, quindi il dato è disponibile solo in forma di indice. I valori mostrati nel dettaglio rappresentano l'indice: ad esempio 178,7 significa +78,7% rispetto all'anno base. <em class='info-fonte'>Fonte: ISTAT Circoscrizioni Turistiche 2004-2013 + dati comunali 2014-2024.</em>",
+
+    alb_cef: "<strong>Alberghiero — Cefalù</strong>Non rilevato direttamente: calcolato sottraendo le presenze extra-alberghiere dal totale. Formula: Alb = Pre_tot − Ext_pre. Re-indicizzato a 2012 = 100 usando i valori assoluti ISTAT 2012 (pre_tot = 634.776, ext_pre = 80.447 notti → alb_base = 554.329 notti). <em class='info-fonte'>Fonte: ISTAT Circoscrizioni Turistiche 2004-2013 + dati comunali.</em>",
+
+    alb_it: "<strong>Alberghiero — Italia</strong>Calcolato sottraendo le presenze extra-alberghiere dal totale nazionale. Formula: Alb = Pre_tot − Ext_pre. Re-indicizzato a 2012 = 100 (pre_2012 = 380,7M, ext_2012 = 125,1M, alb_2012 = 255,6M notti). <em class='info-fonte'>Fonte: ISTAT Serie Storiche nazionali 1956-2024.</em>",
+
+    year_cef: "<strong>Dettaglio anno — Cefalù</strong>Tutti i valori sono indici base 2012 = 100: mostrano la variazione % rispetto al 2012. Il dato Alb è derivato (Pre_tot − Ext_pre), non misurato direttamente. <em class='info-fonte'>Fonte: ISTAT Circoscrizioni Turistiche 2004-2013 + dati comunali 2014-2024.</em>",
+
+    year_it: "<strong>Dettaglio anno — Italia</strong>Tutti i valori sono indici base 2012 = 100: mostrano la variazione % rispetto al 2012. Il dato Alb è derivato (Pre_tot − Ext_pre) e re-indicizzato. <em class='info-fonte'>Fonte: ISTAT Serie Storiche nazionali 1956-2024.</em>",
+
+    pre2012_nat: "<strong>Pre-2012 — Italia (2004 vs 2012)</strong>Indice base 2012 = 100. Variazione % tra il 2004 e il 2012 per i dati nazionali aggregati. Il dato Alb è derivato (Pre_tot − Ext_pre). <em class='info-fonte'>Fonte: ISTAT Serie Storiche nazionali 1956-2024.</em>",
+
+    post2012_nat: "<strong>Post-2012 — Italia (2024 vs 2012)</strong>Indice base 2012 = 100. Crescita % complessiva dal 2012 al 2024 a livello nazionale. <em class='info-fonte'>Fonte: ISTAT Serie Storiche nazionali 1956-2024.</em>",
+
+    preCovid_nat: "<strong>Pre-COVID — Italia (2019 vs 2012)</strong>Indice base 2012 = 100. Variazione % dal 2012 al 2019 per i dati nazionali. Misura la crescita pre-pandemica. <em class='info-fonte'>Fonte: ISTAT Serie Storiche nazionali 1956-2024.</em>",
+
+    reg_post2012: "<strong>Regione: Post-2012 (2024 vs 2014)</strong>Indice base 2014 = 100. I dati comunali ISTAT sono disponibili solo dal 2014, pertanto il confronto parte da quell'anno (non dal 2012). Formula: (valore_2024 / valore_2014) × 100 − 100. <em class='info-fonte'>Fonte: ISTAT dati comunali 2014-2024, aggregati per regione.</em>",
+
+    reg_preCovid: "<strong>Regione: Pre-COVID (2019 vs 2014)</strong>Variazione % dal 2014 al 2019. Formula: (valore_2019 / valore_2014 − 1) × 100. Misura la crescita pre-pandemica partendo dall'anno base disponibile. <em class='info-fonte'>Fonte: ISTAT dati comunali 2014-2024, aggregati per regione.</em>",
+
+    top_preCovid: "<strong>Top City: Pre-COVID (2019 vs 2014)</strong>Variazione % 2019 vs 2014 per il comune selezionato. 'Dati non disponibili' indica che il comune non era classificato nel 2019 nei file ISTAT. Il dato Alb è derivato (alb_pre_tot dalla colonna ISTAT diretta). <em class='info-fonte'>Fonte: ISTAT dati comunali 2014-2024.</em>",
+
+    top_post2014: "<strong>Top City: Crescita totale (2024 vs 2014)</strong>Indice base 2014 = 100. Formula: (valore_2024 / valore_2014) × 100 − 100. Misura la crescita complessiva del comune dal primo anno disponibile. <em class='info-fonte'>Fonte: ISTAT dati comunali 2014-2024.</em>",
+
+    top_gap: "<strong>Gap vs IT al 2024</strong>Differenza in punti percentuali tra l'indice del comune e quello nazionale al 2024 (entrambi base 2014 = 100). Positivo = il comune cresce più della media italiana; negativo = sotto la media. <em class='info-fonte'>Fonte: calcolo su dati ISTAT nazionali e comunali.</em>",
+
+    chart_donuts: "<strong>Analisi Volumi Presenze — Grafico Donut</strong>Tre grafici a ciambella mostrano la composizione delle notti (presenze) per struttura ricettiva:<br><br>• <em>Totale 2024</em>: distribuzione assoluta tra alberghiero ed extra-alberghiero nel 2024.<br>• <em>Pre-2012 (2004)</em>: stessa composizione nell'anno 2004, primo anno disponibile nelle serie storiche ISTAT.<br>• <em>Post-2012 (2024 vs 2012)</em>: confronto della quota relativa tra le due categorie al 2024 rispetto al 2012.<br><br>I valori mostrati sono presenze assolute (notti). <em class='info-fonte'>Fonte: ISTAT Circoscrizioni Turistiche 2004-2013 + dati comunali Cefalù 2014-2024.</em>",
+
+    chart_map: "<strong>Analisi Geografica — Mappa Italia</strong>Mappa interattiva delle 20 regioni italiane. Click su una regione per visualizzare:<br><br>• Dati Pre-2012, Post-2012 e Pre-COVID della regione (indice base 2014 = 100, da dati comunali aggregati).<br>• Il comune con la maggiore crescita assoluta di presenze 2024 vs 2014 (Top City), con i relativi dati di crescita totale e gap rispetto alla media nazionale.<br><br>I dati regionali derivano dall'aggregazione dei microdati comunali ISTAT. <em class='info-fonte'>Fonte: ISTAT dati comunali 2014-2024.</em>",
+
+    chart_evol: "<strong>Evoluzione Storica — Grafico Lineare</strong>Serie storica 2004–2024 con indice base 2012 = 100 (il valore 0 sull'asse Y corrisponde al livello del 2012). Ogni punto mostra la variazione % rispetto al 2012.<br><br>Linee Cefalù (continue): Presenze, Arrivi, Alberghiero (derivato), Extra-Alberghiero.<br>Linee Italia (tratteggiate): stesse metriche a livello nazionale.<br><br>L'Alberghiero non è direttamente rilevato per Cefalù pre-2014: viene derivato come (Pre_tot − Ext_pre) riportato all'indice base 2012. La linea tratteggiata verticale indica l'anno base 2012.<br><br><em>Desktop: pan con trascinamento, zoom con rotellina. Mobile: pan con un dito, pinch per zoomare. Doppio tap per resettare.</em><br><em class='info-fonte'>Fonte: ISTAT Serie Storiche 1956-2024 + dati comunali.</em>",
+
+    chart_seasonality: "<strong>Stagionalità — Grafico a Barre</strong>Distribuzione mensile delle presenze (notti) nel 2024 per Cefalù. Mostra la concentrazione stagionale del flusso turistico: i mesi estivi (giugno–settembre) tipicamente rappresentano la quota dominante. <em class='info-fonte'>Fonte: ISTAT dati comunali Cefalù 2024.</em>",
+
+    chart_origin: "<strong>Origine Turisti — Grafico</strong>Evoluzione della composizione delle presenze 2014–2024 suddivisa tra turisti italiani ed esteri. Permette di valutare nel tempo il grado di internazionalizzazione del turismo di Cefalù. <em class='info-fonte'>Fonte: ISTAT dati comunali Cefalù 2014-2024.</em>",
+
+    chart_alos: "<strong>Permanenza Media (ALOS) — Grafico Lineare</strong>Average Length of Stay: rapporto tra presenze (notti) e arrivi per ogni anno. Misura quante notti in media ogni turista trascorre a Cefalù. Un valore in calo indica soggiorni più brevi (tendenza nazionale); un aumento indica maggiore fidelizzazione o turismo di lunga permanenza. <em class='info-fonte'>Fonte: ISTAT dati comunali Cefalù 2014-2024.</em>",
+
+    chart_ranking: "<strong>Classifica di Crescita Nazionale</strong>Graduatoria dei comuni italiani per crescita delle presenze 2024 vs 2014 (indice base 2014 = 100). Cefalù è evidenziata per mostrarne il posizionamento nel contesto nazionale. La classifica permette di valutare se la crescita locale sia eccezionale o in linea con tendenze diffuse. <em class=\"info-fonte\">Fonte: ISTAT dati comunali 2014-2024.</em>",
+
+    postCovid_nat: "<strong>Post-COVID — Italia (2024 vs 2019)</strong>Variazione % dal 2019 al 2024 per i dati nazionali aggregati. Formula: (valore_2024 / valore_2019 − 1) × 100. Misura il recupero del turismo italiano dopo la pandemia e l\'eventuale crescita aggiuntiva rispetto al picco 2019. Il dato Alb è derivato (Pre_tot − Ext_pre). <em class=\"info-fonte\">Fonte: ISTAT Serie Storiche nazionali 1956-2024.</em>",
+
+    postCovid_reg: "<strong>Regione: Post-COVID (2024 vs 2019)</strong>Variazione % dal 2019 al 2024. Il valore 2019 non è disponibile direttamente nei dati regionali ma viene ricostruito: poiché disponiamo del valore 2024 (base 2014=100) e della crescita pre-COVID 2019 vs 2014, il livello 2019 è calcolato come (100 + covid_var). Formula finale: (arr_2024 / arr_2019 − 1) × 100. <em class=\"info-fonte\">Fonte: ISTAT dati comunali 2014-2024, aggregati per regione.</em>",
+
+    postCovid_top: "<strong>Top City: Post-COVID (2024 vs 2019)</strong>Variazione % dal 2019 al 2024 per il comune selezionato. Il livello 2019 è ricostruito da (100 + preArr) dove preArr è la crescita 2019 vs 2014. Mostra se il comune ha recuperato e superato i volumi pre-pandemia. Non disponibile se i dati 2019 mancano. <em class=\"info-fonte\">Fonte: ISTAT dati comunali 2014-2024.</em>"
+};
+
+function showInfo(key) {
+    document.getElementById('infoText').innerHTML = INFO[key] || key;
+    document.getElementById('infoOverlay').classList.add('active');
+}
+function closeInfo() {
+    document.getElementById('infoOverlay').classList.remove('active');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfo(); });
 </script>
 </body>
 </html>
