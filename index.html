@@ -548,21 +548,109 @@
     // Fine pan con mouse → aggiorna Y
     chartDiv.addEventListener('mouseup', () => setTimeout(handleAutoScale, 60));
 
-    // Mobile: switch dragmode in base al numero di dita
-    // 1 dito = pan, 2 dita = zoom (pinch)
-    chartDiv.addEventListener('touchstart', function(e) {
-        if (e.touches.length === 2) {
-            Plotly.relayout(chartDiv, { dragmode: 'zoom' });
-        }
-    }, { passive: true });
+    // --- CUSTOM TOUCH OVERLAY PER MOBILE ---
+    // Intercettiamo tutti i touch prima che Plotly li catturi, così gestiamo
+    // noi il pan (1 dito) e il pinch-to-zoom (2 dita) senza conflitti.
+    (function() {
+        const MARGIN_L = 40, MARGIN_R = 15, MARGIN_T = 10, MARGIN_B = 80;
 
-    chartDiv.addEventListener('touchend', function(e) {
-        // Quando si sollevano le dita, torna in pan mode e aggiorna Y
-        if (e.touches.length < 2) {
-            Plotly.relayout(chartDiv, { dragmode: 'pan' });
-            scheduleAutoScale();
+        const overlay = document.createElement('div');
+        overlay.style.cssText = [
+            'position:absolute', 'top:0', 'left:0', 'width:100%', 'height:100%',
+            'z-index:10', 'touch-action:none', 'background:transparent'
+        ].join(';');
+        // chartDiv ha già position relative grazie a Plotly
+        chartDiv.appendChild(overlay);
+
+        function plotWidth()  { return chartDiv.offsetWidth  - MARGIN_L - MARGIN_R; }
+        function plotHeight() { return chartDiv.offsetHeight - MARGIN_T - MARGIN_B; }
+        function getXRange()  { return [...chartDiv.layout.xaxis.range]; }
+
+        function touchDist(t) {
+            const dx = t[0].clientX - t[1].clientX;
+            const dy = t[0].clientY - t[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
         }
-    }, { passive: true });
+
+        // Converti clientX in valore dato (anno)
+        function clientXToData(clientX) {
+            const rect  = chartDiv.getBoundingClientRect();
+            const px    = clientX - rect.left - MARGIN_L;
+            const xr    = getXRange();
+            return xr[0] + (px / plotWidth()) * (xr[1] - xr[0]);
+        }
+
+        let prev        = null;   // array di Touch al frame precedente
+        let prevDist    = null;
+        let tapStart    = null;   // {x, y, time} per rilevare tap
+
+        overlay.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            const t = e.touches;
+            prev = t;
+            if (t.length === 2) {
+                prevDist = touchDist(t);
+            }
+            if (t.length === 1) {
+                tapStart = { x: t[0].clientX, y: t[0].clientY, time: Date.now() };
+            } else {
+                tapStart = null;
+            }
+        }, { passive: false });
+
+        overlay.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            if (!prev) return;
+            const t  = e.touches;
+            const xr = getXRange();
+            const pw = plotWidth();
+
+            if (t.length === 1 && prev.length === 1) {
+                // PAN orizzontale
+                const deltaData = -(t[0].clientX - prev[0].clientX) / pw * (xr[1] - xr[0]);
+                Plotly.relayout(chartDiv, { 'xaxis.range': [xr[0] + deltaData, xr[1] + deltaData] });
+                tapStart = null; // movimento → non è un tap
+
+            } else if (t.length === 2 && prevDist) {
+                // PINCH ZOOM attorno al punto medio
+                const currDist = touchDist(t);
+                const scale    = prevDist / currDist;
+                const midData  = clientXToData((t[0].clientX + t[1].clientX) / 2);
+                const span     = xr[1] - xr[0];
+                const ratio    = (midData - xr[0]) / span;
+                const newSpan  = span * scale;
+                Plotly.relayout(chartDiv, {
+                    'xaxis.range': [midData - ratio * newSpan, midData + (1 - ratio) * newSpan]
+                });
+                prevDist = currDist;
+                tapStart = null;
+            }
+            prev = t;
+        }, { passive: false });
+
+        overlay.addEventListener('touchend', function(e) {
+            e.preventDefault();
+
+            // Rilevazione tap: durata < 300ms, spostamento < 12px → simula click su anno
+            if (tapStart && e.changedTouches.length === 1) {
+                const ct   = e.changedTouches[0];
+                const dx   = Math.abs(ct.clientX - tapStart.x);
+                const dy   = Math.abs(ct.clientY - tapStart.y);
+                const dt   = Date.now() - tapStart.time;
+                if (dt < 300 && dx < 12 && dy < 12) {
+                    const dataX = clientXToData(ct.clientX);
+                    const year  = Math.round(dataX);
+                    const idx   = years.indexOf(year);
+                    if (idx !== -1) showYearlyReport(idx);
+                }
+            }
+
+            prev     = e.touches.length > 0 ? e.touches : null;
+            prevDist = e.touches.length === 2 ? touchDist(e.touches) : null;
+            tapStart = null;
+            scheduleAutoScale();
+        }, { passive: false });
+    })();
 
     // Reset totale al doppio click/tap
     chartDiv.on('plotly_doubleclick', () => {
