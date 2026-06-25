@@ -166,52 +166,52 @@
 <script>
     // --- 1. DATABASE VOLUMI ASSOLUTI (Milioni di notti) ---
     const volumeData = {
-        "Italia": { pre: [2410, 1120], post: [3010, 1860] },
-        "Abruzzo": { pre: [48, 18], post: [50, 24] },
-        "Basilicata": { pre: [12, 4], post: [16, 8] },
-        "Calabria": { pre: [42, 15], post: [43, 23] },
-        "Campania": { pre: [145, 62], post: [165, 123] },
-        "Emilia-Romagna": { pre: [330, 95], post: [355, 115] },
-        "Friuli": { pre: [65, 52], post: [77, 66] },
-        "Lazio": { pre: [320, 110], post: [360, 200] },
-        "Liguria": { pre: [115, 55], post: [130, 83] },
-        "Lombardia": { pre: [270, 95], post: [320, 185] },
-        "Marche": { pre: [68, 54], post: [67, 58] },
-        "Molise": { pre: [6, 2], post: [6, 4] },
-        "Piemonte": { pre: [75, 35], post: [90, 57] },
-        "Puglia": { pre: [91, 38], post: [104, 87] },
-        "Sardegna": { pre: [85, 38], post: [100, 60] },
-        "Sicilia": { pre: [102, 45], post: [113, 97] },
-        "Toscana": { pre: [310, 145], post: [330, 245] },
-        "Trentino": { pre: [195, 120], post: [215, 165] },
-        "Umbria": { pre: [31, 35], post: [34, 43] },
-        "Valle d'Aosta": { pre: [21, 8], post: [24, 10] },
-        "Veneto": { pre: [390, 160], post: [420, 260] }
+        "Italia": { pre: [236, 113], post: [269, 172] },
+        "Abruzzo": { pre: [4, 2], post: [4, 3] },
+        "Basilicata": { pre: [1, 1], post: [2, 1] },
+        "Calabria": { pre: [5, 1], post: [6, 2] },
+        "Campania": { pre: [14, 3], post: [16, 4] },
+        "Emilia-Romagna": { pre: [28, 7], post: [29, 10] },
+        "Friuli": { pre: [4, 4], post: [5, 5] },
+        "Lazio": { pre: [25, 5], post: [35, 16] },
+        "Liguria": { pre: [9, 4], post: [9, 6] },
+        "Lombardia": { pre: [20, 6], post: [24, 14] },
+        "Marche": { pre: [5, 5], post: [5, 5] },
+        "Molise": { pre: [1, 0], post: [1, 1] },
+        "Piemonte": { pre: [7, 3], post: [7, 5] },
+        "Puglia": { pre: [8, 5], post: [9, 8] },
+        "Sardegna": { pre: [8, 3], post: [10, 5] },
+        "Sicilia": { pre: [11, 2], post: [11, 4] },
+        "Toscana": { pre: [22, 19], post: [21, 23] },
+        "Trentino": { pre: [32, 10], post: [41, 16] },
+        "Umbria": { pre: [3, 2], post: [3, 3] },
+        "Valle d'Aosta": { pre: [2, 1], post: [2, 1] },
+        "Veneto": { pre: [28, 31], post: [29, 42] }
     };
 
     // --- 2. DATABASE REPORT REGIONALI ---
-    const itBenchmark = { arr: 134.4, pre: 121.3, ext: 143.2 };
+    const itBenchmark = { arr: 131.1, pre: 123.4, ext: 148.4 };
     const regionalDataFull = {
-        "Abruzzo": { reg: { preArr: -2.1, prePre: -1.5, preExt: -0.8, arr: 114.7, pre: 98.9, ext: 117.7 }, top: { name: "Pescara", preArr: +1.4, prePre: +0.8, preExt: +2.1, arr: 118.5, pre: 105.2, ext: 122.4 } },
-        "Basilicata": { reg: { preArr: +4.2, prePre: +3.1, preExt: +5.4, arr: 172.1, pre: 133.5, ext: 158.8 }, top: { name: "Matera", preArr: +15.4, prePre: +12.1, preExt: +18.2, arr: 210.4, pre: 185.2, ext: 198.5 } },
-        "Calabria": { reg: { preArr: -3.4, prePre: -4.1, preExt: -2.2, arr: 116.0, pre: 97.4, ext: 116.0 }, top: { name: "Reggio Calabria", preArr: -0.5, prePre: -2.3, preExt: -1.1, arr: 112.4, pre: 104.1, ext: 115.6 } },
-        "Campania": { reg: { preArr: +2.1, prePre: +1.8, preExt: +3.5, arr: 133.8, pre: 116.1, ext: 138.1 }, top: { name: "Napoli", preArr: +8.4, prePre: +5.2, preExt: +12.4, arr: 165.2, pre: 142.4, ext: 178.1 } },
-        "Emilia-Romagna": { reg: { preArr: +1.1, prePre: +0.5, preExt: +2.4, arr: 130.6, pre: 109.1, ext: 129.8 }, top: { name: "Rimini", preArr: +1.2, prePre: +0.8, preExt: +2.0, arr: 115.4, pre: 108.2, ext: 125.4 } },
-        "Friuli": { reg: { preArr: -1.2, prePre: -0.8, preExt: +0.5, arr: 145.3, pre: 115.2, ext: 137.1 }, top: { name: "Lignano Sabbiadoro", preArr: -1.1, prePre: -0.5, preExt: +0.8, arr: 122.1, pre: 114.5, ext: 132.4 } },
-        "Lazio": { reg: { preArr: +5.4, prePre: +4.2, preExt: +8.1, arr: 124.2, pre: 168.7, ext: 200.7 }, top: { name: "Roma", preArr: +18.4, prePre: +14.2, preExt: +22.5, arr: 155.6, pre: 148.1, ext: 195.2 } },
-        "Liguria": { reg: { preArr: +1.4, prePre: +0.9, preExt: +2.8, arr: 140.8, pre: 120.4, ext: 143.2 }, top: { name: "Genova", preArr: +4.2, prePre: +2.1, preExt: +5.4, arr: 138.4, pre: 125.6, ext: 144.2 } },
-        "Lombardia": { reg: { preArr: +6.1, prePre: +4.8, preExt: +9.4, arr: 137.1, pre: 135.3, ext: 161.0 }, top: { name: "Milano", preArr: +22.1, prePre: +19.4, preExt: +28.2, arr: 178.2, pre: 165.4, ext: 210.5 } },
-        "Marche": { reg: { preArr: -0.8, prePre: -1.2, preExt: -0.4, arr: 118.2, pre: 95.9, ext: 114.2 }, top: { name: "San Benedetto", preArr: -0.8, prePre: -1.5, preExt: -0.5, arr: 110.4, pre: 102.1, ext: 118.4 } },
-        "Molise": { reg: { preArr: -4.2, prePre: -5.1, preExt: -3.8, arr: 77.7, pre: 84.5, ext: 100.5 }, top: { name: "Termoli", preArr: -4.5, prePre: -3.2, preExt: -2.5, arr: 95.4, pre: 88.5, ext: 102.1 } },
-        "Piemonte": { reg: { preArr: +2.8, prePre: +1.2, preExt: +4.4, arr: 129.3, pre: 116.0, ext: 138.0 }, top: { name: "Torino", preArr: +32.1, prePre: +28.4, preExt: +35.6, arr: 145.2, pre: 132.4, ext: 155.6 } },
-        "Puglia": { reg: { preArr: +8.4, prePre: +6.2, preExt: +10.1, arr: 158.3, pre: 134.6, ext: 160.2 }, top: { name: "Vieste", preArr: +5.4, prePre: +3.8, preExt: +6.2, arr: 148.5, pre: 138.1, ext: 152.4 } },
-        "Sardegna": { reg: { preArr: +1.4, prePre: +1.1, preExt: +2.5, arr: 182.8, pre: 144.0, ext: 171.3 }, top: { name: "Arzachena", preArr: +2.1, prePre: +1.5, preExt: +3.4, arr: 125.4, pre: 118.2, ext: 142.1 } },
-        "Sicilia": { reg: { preArr: -1.2, prePre: -1.8, preExt: -0.5, arr: 133.9, pre: 121.5, ext: 144.6 }, top: { name: "Palermo", preArr: +6.2, prePre: +4.5, preExt: +8.4, arr: 152.4, pre: 138.2, ext: 168.4 } },
-        "Toscana": { reg: { preArr: +1.8, prePre: +1.1, preExt: +3.2, arr: 125.9, pre: 108.4, ext: 129.0 }, top: { name: "Firenze", preArr: +12.4, prePre: +10.1, preExt: +15.5, arr: 142.1, pre: 135.6, ext: 172.4 } },
-        "Trentino": { reg: { preArr: +0.8, prePre: +0.5, preExt: +1.2, arr: 144.6, pre: 126.3, ext: 150.3 }, top: { name: "Castelrotto", preArr: +1.5, prePre: +1.1, preExt: +2.4, arr: 118.4, pre: 112.5, ext: 125.6 } },
-        "Umbria": { reg: { preArr: -0.5, prePre: -0.8, preExt: +0.2, arr: 120.5, pre: 115.9, ext: 137.9 }, top: { name: "Assisi", preArr: +0.5, prePre: -0.2, preExt: +1.5, arr: 122.4, pre: 115.6, ext: 128.4 } },
-        "Valle d'Aosta": { reg: { preArr: -1.4, prePre: -1.1, preExt: -0.5, arr: 133.1, pre: 116.7, ext: 138.9 }, top: { name: "Courmayeur", preArr: -2.1, prePre: -1.8, preExt: -1.0, arr: 114.5, pre: 106.4, ext: 118.2 } },
-        "Veneto": { reg: { preArr: +2.1, prePre: +1.4, preExt: +3.8, arr: 137.6, pre: 117.8, ext: 140.2 }, top: { name: "Venezia", preArr: +14.2, prePre: +11.5, preExt: +18.4, arr: 132.4, pre: 125.1, ext: 162.4 } }
+        "Abruzzo": { reg: { preArr: +15.2, prePre: +20.3, preExt: +0.0, arr: 128.2, pre: 114.2, ext: 116.6 }, top: { name: "Pescara", preArr: +43.4, prePre: +16.9, preExt: +172.5, arr: 125.0, pre: 228.7, ext: 116.6 } },
+        "Basilicata": { reg: { preArr: -19.5, prePre: -11.3, preExt: +0.0, arr: 153.9, pre: 119.6, ext: 119.9 }, top: { name: "Matera", preArr: +153.7, prePre: +198.3, preExt: +390.4, arr: 249.1, pre: 239.5, ext: 374.9 } },
+        "Calabria": { reg: { preArr: +8.9, prePre: +9.4, preExt: +0.0, arr: 124.8, pre: 104.9, ext: 128.1 }, top: { name: "Simeri Crichi", preArr: null, prePre: null, preExt: null, arr: 492.5, pre: 301.4, ext: 128.1 } },
+        "Campania": { reg: { preArr: -3.3, prePre: +3.7, preExt: +0.0, arr: 132.7, pre: 118.3, ext: 151.6 }, top: { name: "Giugliano in Campania", preArr: null, prePre: null, preExt: null, arr: 130.3, pre: 390.0, ext: 151.6 } },
+        "Emilia-Romagna": { reg: { preArr: -4.7, prePre: +8.4, preExt: +0.0, arr: 129.2, pre: 115.3, ext: 155.0 }, top: { name: "Castenaso", preArr: +244.9, prePre: +309.7, preExt: +182.9, arr: 274.4, pre: 358.0, ext: 413.2 } },
+        "Friuli": { reg: { preArr: -5.8, prePre: +16.7, preExt: +0.0, arr: 146.6, pre: 133.4, ext: 126.6 }, top: { name: "San Dorligo della Valle-Dolina", preArr: null, prePre: null, preExt: null, arr: 165.3, pre: 557.2, ext: 333.8 } },
+        "Lazio": { reg: { preArr: +2.7, prePre: +2.8, preExt: +0.0, arr: 123.3, pre: 168.0, ext: 344.0 }, top: { name: "Santa Marinella", preArr: +461.3, prePre: +384.4, preExt: +330.8, arr: 633.3, pre: 686.1, ext: 344.0 } },
+        "Liguria": { reg: { preArr: -11.1, prePre: +4.9, preExt: +0.0, arr: 127.4, pre: 119.7, ext: 168.6 }, top: { name: "La Spezia", preArr: +69.2, prePre: +90.3, preExt: +296.9, arr: 211.3, pre: 252.6, ext: 168.6 } },
+        "Lombardia": { reg: { preArr: -23.5, prePre: -17.5, preExt: +0.0, arr: 132.2, pre: 131.6, ext: 220.3 }, top: { name: "Vimercate", preArr: +1291.6, prePre: +1043.0, preExt: +73.3, arr: 1199.0, pre: 993.0, ext: 152.6 } },
+        "Marche": { reg: { preArr: -8.6, prePre: +1.1, preExt: +0.0, arr: 116.0, pre: 92.3, ext: 89.4 }, top: { name: "Mondolfo", preArr: +86.8, prePre: +108.3, preExt: +66.5, arr: 208.5, pre: 217.8, ext: 142.6 } },
+        "Molise": { reg: { preArr: +32.8, prePre: +57.1, preExt: +0.0, arr: 94.0, pre: 108.7, ext: 174.2 }, top: { name: "Termoli", preArr: +17.6, prePre: +6.8, preExt: +9.7, arr: 104.7, pre: 101.8, ext: 110.1 } },
+        "Piemonte": { reg: { preArr: -21.8, prePre: -11.5, preExt: +0.0, arr: 124.4, pre: 110.2, ext: 135.9 }, top: { name: "Alagna Valsesia", preArr: +191.4, prePre: +223.8, preExt: +211.7, arr: 318.4, pre: 360.8, ext: 310.2 } },
+        "Puglia": { reg: { preArr: -10.7, prePre: -8.2, preExt: +0.0, arr: 156.1, pre: 134.8, ext: 166.7 }, top: { name: "Monopoli", preArr: +126.9, prePre: +110.1, preExt: +251.1, arr: 334.2, pre: 290.3, ext: 166.7 } },
+        "Sardegna": { reg: { preArr: -1.1, prePre: +8.2, preExt: +0.0, arr: 161.9, pre: 137.4, ext: 188.4 }, top: { name: "Sassari", preArr: +36.0, prePre: +46.3, preExt: +366.6, arr: 147.8, pre: 212.7, ext: 188.4 } },
+        "Sicilia": { reg: { preArr: -9.0, prePre: -6.2, preExt: +0.0, arr: 125.5, pre: 116.7, ext: 169.0 }, top: { name: "Gioiosa Marea", preArr: +53.7, prePre: +37.8, preExt: +147.2, arr: 230.8, pre: 472.1, ext: 323.1 } },
+        "Toscana": { reg: { preArr: -12.3, prePre: -4.4, preExt: +0.0, arr: 121.3, pre: 107.1, ext: 123.9 }, top: { name: "Castiglion Fiorentino", preArr: +74.8, prePre: +79.9, preExt: +76.4, arr: 238.6, pre: 233.9, ext: 261.4 } },
+        "Trentino": { reg: { preArr: -12.3, prePre: -2.8, preExt: +0.0, arr: 142.0, pre: 129.4, ext: 162.8 }, top: { name: "Commezzadura", preArr: +66.7, prePre: +59.5, preExt: +40.2, arr: 149.9, pre: 159.0, ext: 193.2 } },
+        "Umbria": { reg: { preArr: -7.6, prePre: +2.6, preExt: +0.0, arr: 113.2, pre: 115.2, ext: 122.2 }, top: { name: "Foligno", preArr: +21.6, prePre: +10.4, preExt: +46.4, arr: 120.6, pre: 137.3, ext: 202.1 } },
+        "Valle d'Aosta": { reg: { preArr: -13.0, prePre: +4.3, preExt: +0.0, arr: 136.2, pre: 123.7, ext: 144.4 }, top: { name: "Gressan", preArr: +39.5, prePre: +38.8, preExt: +4.5, arr: 141.4, pre: 155.8, ext: 144.4 } },
+        "Veneto": { reg: { preArr: -13.1, prePre: -2.0, preExt: +0.0, arr: 133.8, pre: 118.8, ext: 135.7 }, top: { name: "Caprino Veronese", preArr: +146.9, prePre: +79.8, preExt: +57.9, arr: 350.0, pre: 265.3, ext: 251.1 } }
     };
 
     // --- 3. FORMATTAZIONE NUMERI ---
@@ -285,15 +285,15 @@
             <div class="report-title">Sintesi Italia 2004-2024</div>
             <div class="data-group">
                 <div class="group-label">Pre-2012</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">+16.9%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">+10.1%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">+12.1%</span></div>
+                <div class="data-row"><span>Arrivi</span><span class="value">+17.1%</span></div>
+                <div class="data-row"><span>Presenze</span><span class="value">+9.2%</span></div>
+                <div class="data-row"><span>Extra-Alb</span><span class="value">+10.8%</span></div>
             </div>
             <div class="data-group">
                 <div class="group-label" style="color:var(--accent)">Post-2012</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">+34.4%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">+21.3%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">+43.2%</span></div>
+                <div class="data-row"><span>Arrivi</span><span class="value">+34.6%</span></div>
+                <div class="data-row"><span>Presenze</span><span class="value">+22.4%</span></div>
+                <div class="data-row"><span>Extra-Alb</span><span class="value">+45.7%</span></div>
             </div>`;
     }
 
@@ -345,11 +345,13 @@
                     </div>
                     <div class="data-group" style="border-left: 4px solid #457b9d; background: #f0f7ff;">
                         <div class="group-label" style="color:#457b9d">Top City: ${data.top.name}</div>
-                        <div class="group-label" style="font-size:0.6em; margin-top:5px;">Pre-2012</div>
-                        <div class="data-row"><span>Arrivi</span><span class="value">${data.top.preArr}%</span></div>
-                        <div class="data-row"><span>Presenze</span><span class="value">${data.top.prePre}%</span></div>
-                        <div class="data-row"><span>Extra-Alb</span><span class="value">${data.top.preExt}%</span></div>
-                        <div class="group-label" style="font-size:0.6em; margin-top:5px; color:var(--accent)">Post-2012</div>
+                        <div class="group-label" style="font-size:0.6em; margin-top:5px;">Pre-COVID (2019 vs 2014)</div>
+                        ${data.top.preArr === null
+                            ? `<div class="data-row"><span style="color:var(--text-sub);font-style:italic;font-size:0.9em">Dati non disponibili per il 2019</span></div>`
+                            : `<div class="data-row"><span>Arrivi</span><span class="value">${data.top.preArr > 0 ? '+' : ''}${data.top.preArr}%</span></div>
+                        <div class="data-row"><span>Presenze</span><span class="value">${data.top.prePre > 0 ? '+' : ''}${data.top.prePre}%</span></div>
+                        <div class="data-row"><span>Extra-Alb</span><span class="value">${data.top.preExt > 0 ? '+' : ''}${data.top.preExt}%</span></div>`}
+                        <div class="group-label" style="font-size:0.6em; margin-top:5px; color:var(--accent)">Crescita totale (2024 vs 2014)</div>
                         <div class="data-row"><span>Arrivi</span><span class="value">${fmt(data.top.arr)}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${fmt(data.top.pre)}%</span></div>
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.top.ext)}%</span></div>
@@ -373,12 +375,12 @@
     // --- 6. GRAFICO STORICO CEFALÙ ---
     const years = [2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024];
     const rawData = {
-        cefPre: [101.1, 104, 95.5, 91.2, 92.9, 92.3, 96.5, 95, 100, 95.5, 97.5, 97.5, 100, 106.8, 122.9, 123.7, 46.5, 87.7, 127.8, 124.4, 146.4],
-        cefArr: [101, 99.1, 94.5, 89.3, 89.3, 90.9, 90.7, 95, 100, 99.2, 105.3, 105.3, 112.4, 124.5, 137.2, 149.9, 73.4, 109, 155.6, 176.3, 178.7],
-        cefExt: [212.5, 193.8, 90.8, 90.5, 94.3, 87.6, 82.7, 95, 100, 106.6, 116.2, 116.2, 132.3, 160.5, 178.4, 180.2, 59.9, 109.5, 257.3, 214.8, 198.2],
-        itPre: [90.8, 93.3, 96.3, 98.9, 98.1, 95.3, 98.1, 99.5, 100, 100, 100.3, 102.5, 105.9, 112.2, 114.4, 117.1, 54.3, 76.5, 109.8, 120.3, 121.3],
-        itArr: [85.5, 89, 93.3, 97.2, 97.3, 95.4, 98.7, 101.4, 100, 100.4, 102.3, 107, 112.3, 119.5, 124.2, 129.5, 59.5, 80.2, 117.8, 131.6, 134.4],
-        itExt: [89.2, 91.8, 94.7, 97.8, 97.5, 95.9, 98.4, 100.2, 100, 99.1, 100.5, 105.5, 113.1, 124.3, 127.3, 133, 56.6, 79.4, 121.2, 139.1, 143.2]
+        cefPre: [101.1, 104, 95.5, 91.2, 92.9, 92.3, 96.5, 98.0, 100, 95.5, 97.5, 97.5, 100, 106.8, 122.9, 123.7, 46.5, 87.7, 127.8, 124.4, 146.4],
+        cefArr: [101, 99.1, 94.5, 89.3, 89.3, 90.9, 90.7, 92.3, 100, 99.2, 105.3, 105.3, 112.4, 124.5, 137.2, 149.9, 73.4, 109, 155.6, 176.4, 178.7],
+        cefExt: [212.5, 193.8, 90.8, 90.5, 94.3, 87.6, 82.7, 104.3, 100, 106.6, 116.2, 116.2, 132.3, 160.5, 178.4, 180.2, 59.9, 109.5, 257.3, 214.8, 198.2],
+        itPre: [90.8, 93.3, 96.3, 98.9, 98.1, 97.4, 98.6, 101.6, 100, 99.0, 99.2, 103.2, 105.8, 110.5, 112.6, 114.7, 54.8, 76.0, 108.2, 117.5, 122.4],
+        itArr: [82.9, 85.2, 89.7, 92.7, 92.1, 92.1, 95.3, 100.0, 100, 100.1, 102.7, 109.3, 112.7, 118.8, 123.5, 126.7, 53.7, 75.8, 114.2, 128.8, 134.6],
+        itExt: [89.2, 91.8, 94.7, 97.8, 97.5, 99.2, 99.5, 101.5, 100, 97.5, 98.2, 103.8, 108.1, 116.3, 119.4, 124.5, 68.1, 95.6, 127.4, 137.3, 145.7]
     };
 
     // --- NUOVI DATI ANALITICI CEFALÙ ---
@@ -392,14 +394,14 @@
     };
 
     const leaderboardData = [
-        { rank: 1, citta: "Fiumicino", growth: "+320%" },
-        { rank: 2, citta: "Marsala", growth: "+242%" },
-        { rank: 3, citta: "Monopoli", growth: "+190%" },
-        { rank: 4, citta: "La Spezia", growth: "+152%" },
-        { rank: 5, citta: "Matera", growth: "+139%" },
-        { rank: 6, citta: "Pescara", growth: "+128%" },
+        { rank: 1, citta: "Vimercate", growth: "+893%" },
+        { rank: 2, citta: "Tirano", growth: "+836%" },
+        { rank: 3, citta: "Vizzola Ticino", growth: "+694%" },
+        { rank: 4, citta: "Santa Marinella", growth: "+586%" },
+        { rank: 5, citta: "San Dorligo d.V.", growth: "+457%" },
+        { rank: 6, citta: "Gioiosa Marea", growth: "+372%" },
         // Salto in classifica...
-        { rank: 34, citta: "Cefalù", growth: "+50%" } 
+        { rank: 117, citta: "Cefalù", growth: "+50%" }
     ];
 
     const fmt = (v) => (v - 100) > 0 ? '+' + (v - 100).toFixed(1) : (v - 100).toFixed(1);
@@ -473,52 +475,22 @@
         Plotly.relayout(chartDiv, { shapes: activeShapes });
     }
 
-    // --- FUNZIONE CORE PER ASSE Y DINAMICO ---
-    function handleAutoScale() {
-        // Ottieni il range attuale della X
-        const xRange = chartDiv.layout.xaxis.range;
-        if (!xRange) return;
-
-        // Trova i valori Y massimi e minimi solo per i punti visibili
-        let minVal = Infinity;
-        let maxVal = -Infinity;
-
-        traces.forEach(trace => {
-            trace.x.forEach((x, i) => {
-                if (x >= xRange[0] && x <= xRange[1]) {
-                    const y = trace.y[i];
-                    if (y < minVal) minVal = y;
-                    if (y > maxVal) maxVal = y;
-                }
-            });
-        });
-
-        // Aggiungi un piccolo margine (10%)
-        const padding = (maxVal - minVal) * 0.1;
-        
-        Plotly.relayout(chartDiv, {
-            'yaxis.range': [minVal - padding, maxVal + padding],
-            'xaxis.dtick': (xRange[1] - xRange[0] < 8) ? 1 : 2
-        });
-    }
-
     // --- INIZIALIZZAZIONE GRAFICO ---
-    Plotly.newPlot(chartDiv, traces, { 
-        dragmode: 'pan', 
-        showlegend: true, 
-        legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' }, 
-        margin: { l: 40, r: 15, t: 10, b: 80 }, 
-        plot_bgcolor: '#ffffff', 
-        xaxis: { gridcolor: '#f0f2f5', type: 'linear', dtick: 2, tickformat: 'd', autorange: true }, 
-        // IL SEGRETO: Blocchiamo la Y al tocco dell'utente. Lo zoom manuale sposterà SOLO la linea del tempo.
-        yaxis: { gridcolor: '#f0f2f5', ticksuffix: '%', fixedrange: true }, 
+    Plotly.newPlot(chartDiv, traces, {
+        dragmode: 'pan',
+        showlegend: true,
+        legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
+        margin: { l: 40, r: 15, t: 10, b: 80 },
+        plot_bgcolor: '#ffffff',
+        xaxis: { gridcolor: '#f0f2f5', type: 'linear', dtick: 2, tickformat: 'd', fixedrange: false, autorange: true },
+        yaxis: { gridcolor: '#f0f2f5', ticksuffix: '%', fixedrange: true },
         shapes: baseShapes
     }, {
-        responsive: true, 
-        scrollZoom: true, 
+        responsive: true,
+        scrollZoom: true,
         displayModeBar: false
     });
-    
+
     showTotalReport();
     showTotalRegionalReport();
     updateDonuts("Italia");
@@ -527,70 +499,55 @@
     chartDiv.on('plotly_hover', (data) => updateShapes(data.points[0].x));
     chartDiv.on('plotly_unhover', () => updateShapes(null));
     chartDiv.on('plotly_click', (data) => showYearlyReport(data.points[0].pointIndex));
-    
-    // --- LA FUNZIONE MAGICA CHE ADATTA L'ALTEZZA ---
+
+    // --- AUTO-SCALING ASSE Y ---
+    let _autoScaleTimer = null;
     function handleAutoScale() {
         const xRange = chartDiv.layout.xaxis.range;
         if (!xRange) return;
 
         let minVal = Infinity;
         let maxVal = -Infinity;
-
-        // Trova il punto più alto e più basso visibili in questo momento
         traces.forEach(trace => {
             trace.x.forEach((x, i) => {
                 if (x >= xRange[0] && x <= xRange[1]) {
                     const y = trace.y[i];
-                    if (y < minVal) minVal = y;
-                    if (y > maxVal) maxVal = y;
+                    if (y !== null && y !== undefined) {
+                        if (y < minVal) minVal = y;
+                        if (y > maxVal) maxVal = y;
+                    }
                 }
             });
         });
 
-        if (minVal === Infinity) return; // Evita errori se si zooma nel vuoto
+        if (minVal === Infinity) return;
 
-        // Calcola la nuova altezza aggiungendo il 10% di margine (respiro)
-        const padding = (maxVal - minVal) * 0.1;
+        const padding = (maxVal - minVal) * 0.1 || 5;
         const newYRange = [minVal - padding, maxVal + padding];
         const newDtick = (xRange[1] - xRange[0] < 8) ? 1 : 2;
 
-        const currentYRange = chartDiv.layout.yaxis.range;
-        
-        // Applica il ricalcolo solo se c'è un vero cambiamento (evita i loop infiniti)
-        if (!currentYRange || Math.abs(currentYRange[0] - newYRange[0]) > 1 || Math.abs(currentYRange[1] - newYRange[1]) > 1) {
-            Plotly.relayout(chartDiv, {
-                'yaxis.range': newYRange,
-                'xaxis.dtick': newDtick
-            });
+        const cur = chartDiv.layout.yaxis.range;
+        if (!cur || Math.abs(cur[0] - newYRange[0]) > 0.5 || Math.abs(cur[1] - newYRange[1]) > 0.5) {
+            Plotly.relayout(chartDiv, { 'yaxis.range': newYRange, 'xaxis.dtick': newDtick });
         }
     }
 
-    // --- GESTIONE FLUIDA DEI TOCCHI ---
-    let isInteracting = false;
-    
-    // Blocca il ricalcolo mentre l'utente sta toccando lo schermo
-    chartDiv.addEventListener('touchstart', () => { isInteracting = true; }, {passive: true});
-    chartDiv.addEventListener('mousedown', () => { isInteracting = true; });
+    function scheduleAutoScale() {
+        clearTimeout(_autoScaleTimer);
+        _autoScaleTimer = setTimeout(handleAutoScale, 60);
+    }
 
-    // Applica l'auto-adattamento appena le dita/mouse lasciano lo schermo
-    chartDiv.addEventListener('touchend', () => { 
-        isInteracting = false; 
-        setTimeout(handleAutoScale, 50); 
-    }, {passive: true});
-    chartDiv.addEventListener('mouseup', () => { 
-        isInteracting = false; 
-        setTimeout(handleAutoScale, 50);
-    });
-
-    // Se si usa la rotellina del mouse (dove non c'è tocco) adatta subito
-    chartDiv.on('plotly_relayout', function(eventdata){
-        if (eventdata['xaxis.autorange']) return;
-        if (eventdata['xaxis.range[0]'] !== undefined || eventdata['xaxis.range']) {
-            if (!isInteracting) {
-                setTimeout(handleAutoScale, 50);
-            }
+    // Scroll wheel zoom (desktop) e pinch-zoom (mobile) → relayout su X → aggiorna Y
+    chartDiv.on('plotly_relayout', function(eventdata) {
+        if (eventdata['xaxis.autorange'] === true) return;
+        if (eventdata['xaxis.range[0]'] !== undefined || eventdata['xaxis.range'] !== undefined) {
+            scheduleAutoScale();
         }
     });
+
+    // Fine pan con mouse o touch → aggiorna Y
+    chartDiv.addEventListener('mouseup', () => setTimeout(handleAutoScale, 60));
+    chartDiv.addEventListener('touchend', scheduleAutoScale, { passive: true });
 
     // Reset totale al doppio click/tap
     chartDiv.on('plotly_doubleclick', () => {
