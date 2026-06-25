@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cefalù Tourism Dashboard - Advanced Analytics</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <style>
         :root {
             --bg-color: #f4f7f9;
@@ -73,7 +76,16 @@
         @media (min-width: 992px) {
             .no-display { display: none; }
         }
-        
+
+        /* Evoluzione Storica: Plotly su desktop, Chart.js su mobile */
+        @media (max-width: 768px) {
+            #chart { display: none !important; }
+            #mobileChart { display: block !important; }
+        }
+        @media (min-width: 769px) {
+            #mobileChart { display: none !important; }
+        }
+
     </style>
 </head>
 <body>
@@ -134,6 +146,7 @@
                 <h1>Evoluzione Storica</h1>
             </div>
             <div id="chart"></div>
+            <canvas id="mobileChart" style="display:none; width:100%; height:340px;"></canvas>
         </div>
         <div class="side-panel">
             <div id="reportContent"></div>
@@ -548,121 +561,64 @@
     // Fine pan con mouse → aggiorna Y
     chartDiv.addEventListener('mouseup', () => setTimeout(handleAutoScale, 60));
 
-    // --- CUSTOM TOUCH OVERLAY PER MOBILE ---
-    // Intercettiamo tutti i touch prima che Plotly li catturi, così gestiamo
-    // noi il pan (1 dito) e il pinch-to-zoom (2 dita) senza conflitti.
-    (function() {
-        const MARGIN_L = 40, MARGIN_R = 15, MARGIN_T = 10, MARGIN_B = 80;
+    // --- MOBILE CHART (Chart.js) ---
+    // Su mobile (<= 768px) Plotly è nascosto via CSS; usiamo Chart.js
+    // che gestisce pan e pinch-to-zoom nativamente tramite Hammer.js.
+    if (window.matchMedia('(max-width: 768px)').matches) {
+        const mobileCanvas = document.getElementById('mobileChart');
+        const dotBorder = [5, 4];
+        const cjsDatasets = [
+            { label: 'Cef: Presenze',  data: rawData.cefPre.map(v => v - 100), borderColor: '#e63946', borderWidth: 3, pointRadius: 2 },
+            { label: 'Cef: Arrivi',    data: rawData.cefArr.map(v => v - 100), borderColor: '#457b9d', borderWidth: 3, pointRadius: 2 },
+            { label: 'Cef: Extra-Alb', data: rawData.cefExt.map(v => v - 100), borderColor: '#24b27e', borderWidth: 3, pointRadius: 2 },
+            { label: 'IT: Presenze',   data: rawData.itPre.map(v => v - 100),  borderColor: '#00cccc', borderWidth: 2, pointRadius: 1, borderDash: dotBorder },
+            { label: 'IT: Arrivi',     data: rawData.itArr.map(v => v - 100),  borderColor: '#ffc300', borderWidth: 2, pointRadius: 1, borderDash: dotBorder },
+            { label: 'IT: Extra-Alb',  data: rawData.itExt.map(v => v - 100),  borderColor: '#9c27b0', borderWidth: 2, pointRadius: 1, borderDash: dotBorder }
+        ].map(d => ({ ...d, fill: false, tension: 0.1, backgroundColor: 'transparent' }));
 
-        const overlay = document.createElement('div');
-        overlay.style.cssText = [
-            'position:absolute', 'top:0', 'left:0', 'width:100%', 'height:100%',
-            'z-index:10', 'touch-action:pan-y', 'background:transparent'
-        ].join(';');
-        chartDiv.appendChild(overlay);
-
-        function plotWidth() { return chartDiv.offsetWidth - MARGIN_L - MARGIN_R; }
-        function getXRange() { return [...chartDiv.layout.xaxis.range]; }
-
-        function touchDist(t) {
-            const dx = t[0].clientX - t[1].clientX;
-            const dy = t[0].clientY - t[1].clientY;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-
-        function clientXToData(clientX) {
-            const rect = chartDiv.getBoundingClientRect();
-            const px   = clientX - rect.left - MARGIN_L;
-            const xr   = getXRange();
-            return xr[0] + (px / plotWidth()) * (xr[1] - xr[0]);
-        }
-
-        let prev        = null;
-        let prevDist    = null;
-        let tapStart    = null;
-        let gesture     = null; // 'pan' | 'pinch' | null — determinato al primo move
-
-        overlay.addEventListener('touchstart', function(e) {
-            const t = e.touches;
-            prev    = t;
-            gesture = null;
-            if (t.length === 2) {
-                prevDist = touchDist(t);
-                tapStart = null;
-            } else if (t.length === 1) {
-                prevDist = null;
-                tapStart = { x: t[0].clientX, y: t[0].clientY, time: Date.now() };
+        const mobileChartInstance = new Chart(mobileCanvas, {
+            type: 'line',
+            data: { labels: years, datasets: cjsDatasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                scales: {
+                    x: {
+                        type: 'category',
+                        ticks: { maxTicksLimit: 7, color: '#697386', font: { size: 10 } },
+                        grid: { color: '#f0f2f5' }
+                    },
+                    y: {
+                        ticks: {
+                            callback: v => (v > 0 ? '+' : '') + v + '%',
+                            color: '#697386',
+                            font: { size: 10 }
+                        },
+                        grid: { color: '#f0f2f5' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 10 }, boxWidth: 20, padding: 8 }
+                    },
+                    tooltip: { enabled: false },
+                    zoom: {
+                        pan:  { enabled: true,  mode: 'x' },
+                        zoom: { pinch: { enabled: true }, wheel: { enabled: false }, mode: 'x' }
+                    }
+                },
+                onClick: (_evt, elements) => {
+                    if (elements.length > 0) showYearlyReport(elements[0].index);
+                },
+                onDblClick: () => mobileChartInstance.resetZoom()
             }
-        }, { passive: true });
+        });
 
-        overlay.addEventListener('touchmove', function(e) {
-            if (!prev) return;
-            const t = e.touches;
-
-            if (t.length === 2) {
-                // Pinch: sempre intercettato
-                e.preventDefault();
-                gesture = 'pinch';
-                const currDist = touchDist(t);
-                if (prevDist && prevDist > 0) {
-                    const scale   = prevDist / currDist;
-                    const xr      = getXRange();
-                    const midData = clientXToData((t[0].clientX + t[1].clientX) / 2);
-                    const span    = xr[1] - xr[0];
-                    const ratio   = (midData - xr[0]) / span;
-                    const newSpan = span * scale;
-                    Plotly.relayout(chartDiv, {
-                        'xaxis.range': [midData - ratio * newSpan, midData + (1 - ratio) * newSpan]
-                    });
-                }
-                prevDist = currDist;
-                tapStart = null;
-
-            } else if (t.length === 1 && prev.length === 1) {
-                const dx = t[0].clientX - prev[0].clientX;
-                const dy = t[0].clientY - prev[0].clientY;
-
-                // Al primo move determina il gesto se ancora ambiguo
-                if (!gesture) {
-                    gesture = Math.abs(dx) >= Math.abs(dy) ? 'pan' : 'scroll';
-                }
-
-                if (gesture === 'pan') {
-                    // Pan orizzontale: blocca lo scroll della pagina
-                    e.preventDefault();
-                    const xr        = getXRange();
-                    const deltaData = -(dx / plotWidth()) * (xr[1] - xr[0]);
-                    Plotly.relayout(chartDiv, {
-                        'xaxis.range': [xr[0] + deltaData, xr[1] + deltaData]
-                    });
-                    tapStart = null;
-                }
-                // gesture === 'scroll': non facciamo nulla, il browser scrolla la pagina
-            }
-            prev = t;
-        }, { passive: false });
-
-        overlay.addEventListener('touchend', function(e) {
-            // Tap: durata < 300ms, spostamento < 12px
-            if (tapStart && e.changedTouches.length === 1) {
-                const ct = e.changedTouches[0];
-                const dx = Math.abs(ct.clientX - tapStart.x);
-                const dy = Math.abs(ct.clientY - tapStart.y);
-                const dt = Date.now() - tapStart.time;
-                if (dt < 300 && dx < 12 && dy < 12) {
-                    const year = Math.round(clientXToData(ct.clientX));
-                    const idx  = years.indexOf(year);
-                    if (idx !== -1) showYearlyReport(idx);
-                }
-            }
-
-            prev     = e.touches.length > 0 ? e.touches : null;
-            prevDist = e.touches.length === 2 ? touchDist(e.touches) : null;
-            tapStart = null;
-            gesture  = null;
-            scheduleAutoScale();
-        }, { passive: true });
-    })();
+        // Doppio tap → reset zoom
+        mobileCanvas.addEventListener('dblclick', () => mobileChartInstance.resetZoom());
+    }
 
     // Reset totale al doppio click/tap
     chartDiv.on('plotly_doubleclick', () => {
