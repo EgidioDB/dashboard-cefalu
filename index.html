@@ -545,9 +545,24 @@
         }
     });
 
-    // Fine pan con mouse o touch → aggiorna Y
+    // Fine pan con mouse → aggiorna Y
     chartDiv.addEventListener('mouseup', () => setTimeout(handleAutoScale, 60));
-    chartDiv.addEventListener('touchend', scheduleAutoScale, { passive: true });
+
+    // Mobile: switch dragmode in base al numero di dita
+    // 1 dito = pan, 2 dita = zoom (pinch)
+    chartDiv.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            Plotly.relayout(chartDiv, { dragmode: 'zoom' });
+        }
+    }, { passive: true });
+
+    chartDiv.addEventListener('touchend', function(e) {
+        // Quando si sollevano le dita, torna in pan mode e aggiorna Y
+        if (e.touches.length < 2) {
+            Plotly.relayout(chartDiv, { dragmode: 'pan' });
+            scheduleAutoScale();
+        }
+    }, { passive: true });
 
     // Reset totale al doppio click/tap
     chartDiv.on('plotly_doubleclick', () => {
