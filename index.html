@@ -418,15 +418,23 @@
     ];
 
     const fmt = (v) => (v - 100) > 0 ? '+' + (v - 100).toFixed(1) : (v - 100).toFixed(1);
+
+    // Calcolo indice alberghiero: alb = tot_pre - ext_pre, re-indicizzato a 2012=100
+    const CEF_PRE_BASE = 634776, CEF_EXT_BASE = 80447, CEF_ALB_BASE = CEF_PRE_BASE - CEF_EXT_BASE;
+    const cefAlb = years.map((_, i) => {
+        const preAbs = rawData.cefPre[i] * CEF_PRE_BASE / 100;
+        const extAbs = rawData.cefExt[i] * CEF_EXT_BASE / 100;
+        return ((preAbs - extAbs) / CEF_ALB_BASE) * 100;
+    });
+
     const traces = [
-        { x: years, y: rawData.cefPre.map(v=>v-100), name: 'Cef: Presenze', line: {color: '#e63946', width: 3.5} },
-        { x: years, y: rawData.cefArr.map(v=>v-100), name: 'Cef: Arrivi', line: {color: '#457b9d', width: 3.5} },
-        { x: years, y: rawData.cefExt.map(v=>v-100), name: 'Cef: Extra-Alb', line: {color: '#24b27e', width: 4.5} },
-        
-        // Nuovi colori per l'Italia (Tratteggiate)
-        { x: years, y: rawData.itPre.map(v=>v-100), name: 'IT: Presenze', line: {color: '#00ffea', width: 2, dash: 'dot'} }, // Giallo
-        { x: years, y: rawData.itArr.map(v=>v-100), name: 'IT: Arrivi', line: {color: '#ffc300', width: 2, dash: 'dot'} }, // Arancione
-        { x: years, y: rawData.itExt.map(v=>v-100), name: 'IT: Extra-Alb', line: {color: '#9c27b0', width: 2, dash: 'dot'} } // Fucsia
+        { x: years, y: rawData.cefPre.map(v=>v-100), name: 'Cef: Presenze',  line: {color: '#e63946', width: 3.5} },
+        { x: years, y: rawData.cefArr.map(v=>v-100), name: 'Cef: Arrivi',    line: {color: '#457b9d', width: 3.5} },
+        { x: years, y: cefAlb.map(v=>v-100),          name: 'Cef: Alb',       line: {color: '#f4a261', width: 3.5} },
+        { x: years, y: rawData.cefExt.map(v=>v-100), name: 'Cef: Extra-Alb', line: {color: '#24b27e', width: 3.5} },
+        { x: years, y: rawData.itPre.map(v=>v-100),  name: 'IT: Presenze',   line: {color: '#00ffea', width: 2, dash: 'dot'} },
+        { x: years, y: rawData.itArr.map(v=>v-100),  name: 'IT: Arrivi',     line: {color: '#ffc300', width: 2, dash: 'dot'} },
+        { x: years, y: rawData.itExt.map(v=>v-100),  name: 'IT: Extra-Alb',  line: {color: '#9c27b0', width: 2, dash: 'dot'} }
     ].map(t => ({...t, mode: 'lines+markers', hoverinfo: 'none'}));
 
     const baseShapes = [{ type: 'line', x0: 2012, x1: 2012, y0: 0, y1: 1, yref: 'paper', line: { color: '#000', width: 2, dash: 'dash' } }];
@@ -577,8 +585,49 @@
     if (window.matchMedia('(max-width: 768px)').matches) {
         const mobileCanvas = document.getElementById('mobileChart');
         const dash = [5, 4];
+        let _selectedYear = null;
 
-        // Dataset in formato {x, y} per asse lineare
+        // Plugin inline: linea 2012 + colonna anno selezionato
+        const overlayPlugin = {
+            id: 'mobileOverlay',
+            afterDraw(chart) {
+                const { ctx, scales: { x, y }, chartArea: ca } = chart;
+                if (!ca) return;
+
+                // Larghezza di mezzo anno in pixel (per il rettangolo highlight)
+                const halfW = Math.abs(x.getPixelForValue(2013) - x.getPixelForValue(2012)) / 2;
+
+                // Colonna anno selezionato
+                if (_selectedYear !== null) {
+                    const px = x.getPixelForValue(_selectedYear);
+                    if (px >= ca.left - halfW && px <= ca.right + halfW) {
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(230, 57, 70, 0.12)';
+                        ctx.fillRect(
+                            Math.max(px - halfW, ca.left), ca.top,
+                            Math.min(px + halfW, ca.right) - Math.max(px - halfW, ca.left),
+                            ca.bottom - ca.top
+                        );
+                        ctx.restore();
+                    }
+                }
+
+                // Linea tratteggiata 2012
+                const px2012 = x.getPixelForValue(2012);
+                if (px2012 >= ca.left && px2012 <= ca.right) {
+                    ctx.save();
+                    ctx.setLineDash([6, 4]);
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(px2012, ca.top);
+                    ctx.lineTo(px2012, ca.bottom);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        };
+
         function mkDataset(label, raw, color, width, isDash) {
             return {
                 label,
@@ -595,10 +644,12 @@
 
         const mobileChartInstance = new Chart(mobileCanvas, {
             type: 'line',
+            plugins: [overlayPlugin],
             data: {
                 datasets: [
                     mkDataset('Cef: Presenze',  rawData.cefPre, '#e63946', 3,   false),
                     mkDataset('Cef: Arrivi',    rawData.cefArr, '#457b9d', 3,   false),
+                    mkDataset('Cef: Alb',       cefAlb,         '#f4a261', 3,   false),
                     mkDataset('Cef: Extra-Alb', rawData.cefExt, '#24b27e', 3,   false),
                     mkDataset('IT: Presenze',   rawData.itPre,  '#00cccc', 1.5, true),
                     mkDataset('IT: Arrivi',     rawData.itArr,  '#ffc300', 1.5, true),
@@ -631,12 +682,6 @@
                 plugins: {
                     legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 18, padding: 8 } },
                     tooltip: { enabled: false }
-                },
-                onClick: (_evt, elements) => {
-                    if (elements.length > 0) {
-                        const yr = mobileChartInstance.data.datasets[0].data[elements[0].index].x;
-                        showYearlyReport(years.indexOf(yr));
-                    }
                 }
             }
         });
@@ -724,22 +769,26 @@
                 const dt = Date.now() - _tapStart.time;
 
                 if (dt < 300 && dx < 12 && dy < 12) {
-                    // Doppio tap → reset
                     const now = Date.now();
                     if (now - _lastTap < 400) {
+                        // Doppio tap → reset
+                        _selectedYear = null;
                         applyRange(2004, 2024);
                         showTotalReport();
                     } else {
-                        // Tap singolo → seleziona anno
-                        const sc  = mobileChartInstance.scales.x;
-                        const pw  = mobileCanvas.offsetWidth;
-                        const rect = mobileCanvas.getBoundingClientRect();
-                        const pxInPlot = ct.clientX - rect.left - (mobileChartInstance.chartArea ? mobileChartInstance.chartArea.left : 40);
-                        const chartW   = mobileChartInstance.chartArea ? mobileChartInstance.chartArea.width : pw - 50;
-                        const dataX    = sc.min + (pxInPlot / chartW) * (sc.max - sc.min);
+                        // Tap singolo → seleziona anno + colonna highlight
+                        const sc       = mobileChartInstance.scales.x;
+                        const ca       = mobileChartInstance.chartArea;
+                        const rect     = mobileCanvas.getBoundingClientRect();
+                        const pxInPlot = ct.clientX - rect.left - ca.left;
+                        const dataX    = sc.min + (pxInPlot / ca.width) * (sc.max - sc.min);
                         const year     = Math.round(dataX);
                         const idx      = years.indexOf(year);
-                        if (idx !== -1) showYearlyReport(idx);
+                        if (idx !== -1) {
+                            _selectedYear = year;
+                            mobileChartInstance.update('none');
+                            showYearlyReport(idx);
+                        }
                     }
                     _lastTap = now;
                 }
