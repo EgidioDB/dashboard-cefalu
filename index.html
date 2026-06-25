@@ -31,7 +31,7 @@
         .dashboard-row { display: flex; gap: 15px; width: 100%; justify-content: space-between; }
         .row-map { height: 680px; } /* Altezza ridotta per la mappa */
         .row-donuts { height: 350px; }
-        .row-chart { height: 650px; }
+        .row-chart { height: 670px; }
 
         .main-panel { flex: 0 0 70%; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 15px; display: flex; flex-direction: column; }
         .side-panel { flex: 0 0 22%; background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 20px; overflow-y: auto; }
@@ -451,6 +451,18 @@
                 <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.cefArr[20])}%</span></div>
                 <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[20])}%</span></div>
                 <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[20])}%</span></div>
+            </div>
+            <div class="data-group">
+                <div class="group-label">Pre-COVID (2019 vs 2012)</div>
+                <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.cefArr[15])}%</span></div>
+                <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[15])}%</span></div>
+                <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[15])}%</span></div>
+            </div>
+            <div class="data-group">
+                <div class="group-label" style="color:#457b9d">Post-COVID (2024 vs 2019)</div>
+                <div class="data-row"><span>Arrivi</span><span class="value">${((rawData.cefArr[20]/rawData.cefArr[15]-1)*100).toFixed(1).replace(/^([^-])/,'+$1')}%</span></div>
+                <div class="data-row"><span>Presenze</span><span class="value">${((rawData.cefPre[20]/rawData.cefPre[15]-1)*100).toFixed(1).replace(/^([^-])/,'+$1')}%</span></div>
+                <div class="data-row"><span>Extra-Alb</span><span class="value">${((rawData.cefExt[20]/rawData.cefExt[15]-1)*100).toFixed(1).replace(/^([^-])/,'+$1')}%</span></div>
             </div>
             <div class="data-group">
                 <div class="group-label">Confronto Media Nazionale<br>al 2024</div>
