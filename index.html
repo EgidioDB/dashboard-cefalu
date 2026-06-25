@@ -205,26 +205,26 @@
     // --- 2. DATABASE REPORT REGIONALI ---
     const itBenchmark = { arr: 131.1, pre: 123.4, ext: 148.4 };
     const regionalDataFull = {
-        "Abruzzo": { reg: { preArr: +15.2, prePre: +20.3, preExt: +0.0, arr: 128.2, pre: 114.2, ext: 116.6 }, top: { name: "Pescara", preArr: +43.4, prePre: +16.9, preExt: +172.5, arr: 125.0, pre: 228.7, ext: 116.6 } },
-        "Basilicata": { reg: { preArr: -19.5, prePre: -11.3, preExt: +0.0, arr: 153.9, pre: 119.6, ext: 119.9 }, top: { name: "Matera", preArr: +153.7, prePre: +198.3, preExt: +390.4, arr: 249.1, pre: 239.5, ext: 374.9 } },
-        "Calabria": { reg: { preArr: +8.9, prePre: +9.4, preExt: +0.0, arr: 124.8, pre: 104.9, ext: 128.1 }, top: { name: "Simeri Crichi", preArr: null, prePre: null, preExt: null, arr: 492.5, pre: 301.4, ext: 128.1 } },
-        "Campania": { reg: { preArr: -3.3, prePre: +3.7, preExt: +0.0, arr: 132.7, pre: 118.3, ext: 151.6 }, top: { name: "Giugliano in Campania", preArr: null, prePre: null, preExt: null, arr: 130.3, pre: 390.0, ext: 151.6 } },
-        "Emilia-Romagna": { reg: { preArr: -4.7, prePre: +8.4, preExt: +0.0, arr: 129.2, pre: 115.3, ext: 155.0 }, top: { name: "Castenaso", preArr: +244.9, prePre: +309.7, preExt: +182.9, arr: 274.4, pre: 358.0, ext: 413.2 } },
-        "Friuli": { reg: { preArr: -5.8, prePre: +16.7, preExt: +0.0, arr: 146.6, pre: 133.4, ext: 126.6 }, top: { name: "San Dorligo della Valle-Dolina", preArr: null, prePre: null, preExt: null, arr: 165.3, pre: 557.2, ext: 333.8 } },
-        "Lazio": { reg: { preArr: +2.7, prePre: +2.8, preExt: +0.0, arr: 123.3, pre: 168.0, ext: 344.0 }, top: { name: "Santa Marinella", preArr: +461.3, prePre: +384.4, preExt: +330.8, arr: 633.3, pre: 686.1, ext: 344.0 } },
-        "Liguria": { reg: { preArr: -11.1, prePre: +4.9, preExt: +0.0, arr: 127.4, pre: 119.7, ext: 168.6 }, top: { name: "La Spezia", preArr: +69.2, prePre: +90.3, preExt: +296.9, arr: 211.3, pre: 252.6, ext: 168.6 } },
-        "Lombardia": { reg: { preArr: -23.5, prePre: -17.5, preExt: +0.0, arr: 132.2, pre: 131.6, ext: 220.3 }, top: { name: "Vimercate", preArr: +1291.6, prePre: +1043.0, preExt: +73.3, arr: 1199.0, pre: 993.0, ext: 152.6 } },
-        "Marche": { reg: { preArr: -8.6, prePre: +1.1, preExt: +0.0, arr: 116.0, pre: 92.3, ext: 89.4 }, top: { name: "Mondolfo", preArr: +86.8, prePre: +108.3, preExt: +66.5, arr: 208.5, pre: 217.8, ext: 142.6 } },
-        "Molise": { reg: { preArr: +32.8, prePre: +57.1, preExt: +0.0, arr: 94.0, pre: 108.7, ext: 174.2 }, top: { name: "Termoli", preArr: +17.6, prePre: +6.8, preExt: +9.7, arr: 104.7, pre: 101.8, ext: 110.1 } },
-        "Piemonte": { reg: { preArr: -21.8, prePre: -11.5, preExt: +0.0, arr: 124.4, pre: 110.2, ext: 135.9 }, top: { name: "Alagna Valsesia", preArr: +191.4, prePre: +223.8, preExt: +211.7, arr: 318.4, pre: 360.8, ext: 310.2 } },
-        "Puglia": { reg: { preArr: -10.7, prePre: -8.2, preExt: +0.0, arr: 156.1, pre: 134.8, ext: 166.7 }, top: { name: "Monopoli", preArr: +126.9, prePre: +110.1, preExt: +251.1, arr: 334.2, pre: 290.3, ext: 166.7 } },
-        "Sardegna": { reg: { preArr: -1.1, prePre: +8.2, preExt: +0.0, arr: 161.9, pre: 137.4, ext: 188.4 }, top: { name: "Sassari", preArr: +36.0, prePre: +46.3, preExt: +366.6, arr: 147.8, pre: 212.7, ext: 188.4 } },
-        "Sicilia": { reg: { preArr: -9.0, prePre: -6.2, preExt: +0.0, arr: 125.5, pre: 116.7, ext: 169.0 }, top: { name: "Gioiosa Marea", preArr: +53.7, prePre: +37.8, preExt: +147.2, arr: 230.8, pre: 472.1, ext: 323.1 } },
-        "Toscana": { reg: { preArr: -12.3, prePre: -4.4, preExt: +0.0, arr: 121.3, pre: 107.1, ext: 123.9 }, top: { name: "Castiglion Fiorentino", preArr: +74.8, prePre: +79.9, preExt: +76.4, arr: 238.6, pre: 233.9, ext: 261.4 } },
-        "Trentino": { reg: { preArr: -12.3, prePre: -2.8, preExt: +0.0, arr: 142.0, pre: 129.4, ext: 162.8 }, top: { name: "Commezzadura", preArr: +66.7, prePre: +59.5, preExt: +40.2, arr: 149.9, pre: 159.0, ext: 193.2 } },
-        "Umbria": { reg: { preArr: -7.6, prePre: +2.6, preExt: +0.0, arr: 113.2, pre: 115.2, ext: 122.2 }, top: { name: "Foligno", preArr: +21.6, prePre: +10.4, preExt: +46.4, arr: 120.6, pre: 137.3, ext: 202.1 } },
-        "Valle d'Aosta": { reg: { preArr: -13.0, prePre: +4.3, preExt: +0.0, arr: 136.2, pre: 123.7, ext: 144.4 }, top: { name: "Gressan", preArr: +39.5, prePre: +38.8, preExt: +4.5, arr: 141.4, pre: 155.8, ext: 144.4 } },
-        "Veneto": { reg: { preArr: -13.1, prePre: -2.0, preExt: +0.0, arr: 133.8, pre: 118.8, ext: 135.7 }, top: { name: "Caprino Veronese", preArr: +146.9, prePre: +79.8, preExt: +57.9, arr: 350.0, pre: 265.3, ext: 251.1 } }
+        "Abruzzo":        { reg: { preArr: +15.2, prePre: +20.3, preExt:  +0.0, arr: 128.2, pre: 114.2, alb: 117.0, ext: 116.6 }, top: { name: "Pescara",                        preArr:   +43.4, prePre:   +16.9, preAlb:   +7.1, preExt: +172.5, arr: 125.0, pre: 228.7, alb: 121.3, ext: 116.6 } },
+        "Basilicata":     { reg: { preArr: -19.5, prePre: -11.3, preExt:  +0.0, arr: 153.9, pre: 119.6, alb: 126.6, ext: 119.9 }, top: { name: "Matera",                          preArr:  +153.7, prePre:  +198.3, preAlb: +120.4, preExt: +390.4, arr: 249.1, pre: 239.5, alb: 184.5, ext: 374.9 } },
+        "Calabria":       { reg: { preArr:  +8.9, prePre:  +9.4, preExt:  +0.0, arr: 124.8, pre: 104.9, alb: 110.9, ext: 128.1 }, top: { name: "Simeri Crichi",                  preArr:   null,  prePre:   null,  preAlb:  null,  preExt:  null,  arr: 492.5, pre: 301.4, alb:  null, ext: 128.1 } },
+        "Campania":       { reg: { preArr:  -3.3, prePre:  +3.7, preExt:  +0.0, arr: 132.7, pre: 118.3, alb: 113.3, ext: 151.6 }, top: { name: "Giugliano in Campania",          preArr:   null,  prePre:   null,  preAlb: +229.5, preExt:  null,  arr: 130.3, pre: 390.0, alb: 390.0, ext: 151.6 } },
+        "Emilia-Romagna": { reg: { preArr:  -4.7, prePre:  +8.4, preExt:  +0.0, arr: 129.2, pre: 115.3, alb: 105.5, ext: 155.0 }, top: { name: "Castenaso",                      preArr:  +244.9, prePre:  +309.7, preAlb: +319.5, preExt: +182.9, arr: 274.4, pre: 358.0, alb: 353.7, ext: 413.2 } },
+        "Friuli":         { reg: { preArr:  -5.8, prePre: +16.7, preExt:  +0.0, arr: 146.6, pre: 133.4, alb: 142.3, ext: 126.6 }, top: { name: "San Dorligo della Valle-Dolina", preArr:   null,  prePre:   null,  preAlb:  null,  preExt:  null,  arr: 165.3, pre: 557.2, alb: 582.2, ext: 333.8 } },
+        "Lazio":          { reg: { preArr:  +2.7, prePre:  +2.8, preExt:  +0.0, arr: 123.3, pre: 168.0, alb: 139.6, ext: 344.0 }, top: { name: "Santa Marinella",                preArr:  +461.3, prePre:  +384.4, preAlb: +401.9, preExt: +330.8, arr: 633.3, pre: 686.1, alb: 684.9, ext: 344.0 } },
+        "Liguria":        { reg: { preArr: -11.1, prePre:  +4.9, preExt:  +0.0, arr: 127.4, pre: 119.7, alb: 102.2, ext: 168.6 }, top: { name: "La Spezia",                      preArr:   +69.2, prePre:   +90.3, preAlb:  +11.9, preExt: +296.9, arr: 211.3, pre: 252.6, alb: 128.9, ext: 168.6 } },
+        "Lombardia":      { reg: { preArr: -23.5, prePre: -17.5, preExt:  +0.0, arr: 132.2, pre: 131.6, alb: 121.2, ext: 220.3 }, top: { name: "Vimercate",                      preArr: +1291.6, prePre: +1043.0, preAlb:+1228.1, preExt:  +73.3, arr:1199.0, pre: 993.0, alb:1153.4, ext: 152.6 } },
+        "Marche":         { reg: { preArr:  -8.6, prePre:  +1.1, preExt:  +0.0, arr: 116.0, pre:  92.3, alb:  95.4, ext:  89.4 }, top: { name: "Mondolfo",                       preArr:   +86.8, prePre:  +108.3, preAlb: +157.4, preExt:  +66.5, arr: 208.5, pre: 217.8, alb: 306.0, ext: 142.6 } },
+        "Molise":         { reg: { preArr: +32.8, prePre: +57.1, preExt:  +0.0, arr:  94.0, pre: 108.7, alb:  92.3, ext: 174.2 }, top: { name: "Termoli",                        preArr:   +17.6, prePre:    +6.8, preAlb:   +4.7, preExt:   +9.7, arr: 104.7, pre: 101.8, alb:  95.8, ext: 110.1 } },
+        "Piemonte":       { reg: { preArr: -21.8, prePre: -11.5, preExt:  +0.0, arr: 124.4, pre: 110.2, alb: 105.2, ext: 135.9 }, top: { name: "Alagna Valsesia",                preArr:  +191.4, prePre:  +223.8, preAlb: +253.4, preExt: +211.7, arr: 318.4, pre: 360.8, alb: 485.2, ext: 310.2 } },
+        "Puglia":         { reg: { preArr: -10.7, prePre:  -8.2, preExt:  +0.0, arr: 156.1, pre: 134.8, alb: 118.5, ext: 166.7 }, top: { name: "Monopoli",                       preArr:  +126.9, prePre:  +110.1, preAlb:  +67.1, preExt: +251.1, arr: 334.2, pre: 290.3, alb: 189.7, ext: 166.7 } },
+        "Sardegna":       { reg: { preArr:  -1.1, prePre:  +8.2, preExt:  +0.0, arr: 161.9, pre: 137.4, alb: 121.4, ext: 188.4 }, top: { name: "Sassari",                        preArr:   +36.0, prePre:   +46.3, preAlb:  +37.1, preExt: +366.6, arr: 147.8, pre: 212.7, alb: 186.8, ext: 188.4 } },
+        "Sicilia":        { reg: { preArr:  -9.0, prePre:  -6.2, preExt:  +0.0, arr: 125.5, pre: 116.7, alb: 101.3, ext: 169.0 }, top: { name: "Gioiosa Marea",                  preArr:   +53.7, prePre:   +37.8, preAlb:  -20.8, preExt: +147.2, arr: 230.8, pre: 472.1, alb: 551.9, ext: 323.1 } },
+        "Toscana":        { reg: { preArr: -12.3, prePre:  -4.4, preExt:  +0.0, arr: 121.3, pre: 107.1, alb:  92.2, ext: 123.9 }, top: { name: "Castiglion Fiorentino",          preArr:   +74.8, prePre:   +79.9, preAlb:  +82.9, preExt:  +76.4, arr: 238.6, pre: 233.9, alb: 211.0, ext: 261.4 } },
+        "Trentino":       { reg: { preArr: -12.3, prePre:  -2.8, preExt:  +0.0, arr: 142.0, pre: 129.4, alb: 127.0, ext: 162.8 }, top: { name: "Commezzadura",                  preArr:   +66.7, prePre:   +59.5, preAlb:  +62.0, preExt:  +40.2, arr: 149.9, pre: 159.0, alb: 154.6, ext: 193.2 } },
+        "Umbria":         { reg: { preArr:  -7.6, prePre:  +2.6, preExt:  +0.0, arr: 113.2, pre: 115.2, alb: 109.4, ext: 122.2 }, top: { name: "Foligno",                        preArr:   +21.6, prePre:   +10.4, preAlb:   -1.7, preExt:  +46.4, arr: 120.6, pre: 137.3, alb: 115.5, ext: 202.1 } },
+        "Valle d'Aosta":  { reg: { preArr: -13.0, prePre:  +4.3, preExt:  +0.0, arr: 136.2, pre: 123.7, alb: 121.0, ext: 144.4 }, top: { name: "Gressan",                        preArr:   +39.5, prePre:   +38.8, preAlb:  +45.5, preExt:   +4.5, arr: 141.4, pre: 155.8, alb: 170.7, ext: 144.4 } },
+        "Veneto":         { reg: { preArr: -13.1, prePre:  -2.0, preExt:  +0.0, arr: 133.8, pre: 118.8, alb: 104.1, ext: 135.7 }, top: { name: "Caprino Veronese",               preArr:  +146.9, prePre:   +79.8, preAlb: +104.0, preExt:  +57.9, arr: 350.0, pre: 265.3, alb: 281.1, ext: 251.1 } }
     };
 
     // --- 3. FORMATTAZIONE NUMERI ---
@@ -300,12 +300,14 @@
                 <div class="group-label">Pre-2012</div>
                 <div class="data-row"><span>Arrivi</span><span class="value">+17.1%</span></div>
                 <div class="data-row"><span>Presenze</span><span class="value">+9.2%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value">${sgn(itAlb[0]-100)}%</span></div>
                 <div class="data-row"><span>Extra-Alb</span><span class="value">+10.8%</span></div>
             </div>
             <div class="data-group">
                 <div class="group-label" style="color:var(--accent)">Post-2012</div>
                 <div class="data-row"><span>Arrivi</span><span class="value">+34.6%</span></div>
                 <div class="data-row"><span>Presenze</span><span class="value">+22.4%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value">${sgn(itAlb[20]-100)}%</span></div>
                 <div class="data-row"><span>Extra-Alb</span><span class="value">+45.7%</span></div>
             </div>`;
     }
@@ -354,6 +356,7 @@
                         <div class="group-label" style="color:var(--accent); margin-top:10px">Regione: Post-2012</div>
                         <div class="data-row"><span>Arrivi</span><span class="value">${fmt(data.reg.arr)}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${fmt(data.reg.pre)}%</span></div>
+                        <div class="data-row"><span>Alb</span><span class="value">${fmt(data.reg.alb)}%</span></div>
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.reg.ext)}%</span></div>
                     </div>
                     <div class="data-group" style="border-left: 4px solid #457b9d; background: #f0f7ff;">
@@ -363,10 +366,12 @@
                             ? `<div class="data-row"><span style="color:var(--text-sub);font-style:italic;font-size:0.9em">Dati non disponibili per il 2019</span></div>`
                             : `<div class="data-row"><span>Arrivi</span><span class="value">${data.top.preArr > 0 ? '+' : ''}${data.top.preArr}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${data.top.prePre > 0 ? '+' : ''}${data.top.prePre}%</span></div>
+                        ${data.top.preAlb === null ? '' : `<div class="data-row"><span>Alb</span><span class="value">${data.top.preAlb > 0 ? '+' : ''}${data.top.preAlb}%</span></div>`}
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${data.top.preExt > 0 ? '+' : ''}${data.top.preExt}%</span></div>`}
                         <div class="group-label" style="font-size:0.6em; margin-top:15px; color:var(--accent)">Crescita totale (2024 vs 2014)</div>
                         <div class="data-row"><span>Arrivi</span><span class="value">${fmt(data.top.arr)}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${fmt(data.top.pre)}%</span></div>
+                        ${data.top.alb === null ? '' : `<div class="data-row"><span>Alb</span><span class="value">${fmt(data.top.alb)}%</span></div>`}
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.top.ext)}%</span></div>
                         <div class="group-label" style="font-size:0.6em; margin-top:15px;">Gap vs IT (2024)</div>
                         <div class="data-row"><span>Gap Arrivi</span><span class="value" style="color:${gapArr > 0 ? 'var(--accent)' : '#c0392b'}">${gapArr > 0 ? '+' : ''}${gapArr}%</span></div>
@@ -426,6 +431,13 @@
         const extAbs = rawData.cefExt[i] * CEF_EXT_BASE / 100;
         return ((preAbs - extAbs) / CEF_ALB_BASE) * 100;
     });
+    const IT_PRE_BASE = 380711483, IT_EXT_BASE = 125101340, IT_ALB_BASE = IT_PRE_BASE - IT_EXT_BASE;
+    const itAlb = years.map((_, i) => {
+        const preAbs = rawData.itPre[i] * IT_PRE_BASE / 100;
+        const extAbs = rawData.itExt[i] * IT_EXT_BASE / 100;
+        return ((preAbs - extAbs) / IT_ALB_BASE) * 100;
+    });
+    const sgn = v => v >= 0 ? '+' + v.toFixed(1) : v.toFixed(1); // helper segno esplicito
 
     const traces = [
         { x: years, y: rawData.cefPre.map(v=>v-100), name: 'Cef: Presenze',  line: {color: '#e63946', width: 3.5} },
@@ -434,6 +446,7 @@
         { x: years, y: rawData.cefExt.map(v=>v-100), name: 'Cef: Extra-Alb', line: {color: '#24b27e', width: 3.5} },
         { x: years, y: rawData.itPre.map(v=>v-100),  name: 'IT: Presenze',   line: {color: '#00ffea', width: 2, dash: 'dot'} },
         { x: years, y: rawData.itArr.map(v=>v-100),  name: 'IT: Arrivi',     line: {color: '#ffc300', width: 2, dash: 'dot'} },
+        { x: years, y: itAlb.map(v=>v-100),           name: 'IT: Alb',        line: {color: '#ff8c42', width: 2, dash: 'dot'} },
         { x: years, y: rawData.itExt.map(v=>v-100),  name: 'IT: Extra-Alb',  line: {color: '#9c27b0', width: 2, dash: 'dot'} }
     ].map(t => ({...t, mode: 'lines+markers', hoverinfo: 'none'}));
 
@@ -446,36 +459,42 @@
         const gA = (rawData.cefArr[20] - itBenchmark.arr).toFixed(1);
         const gP = (rawData.cefPre[20] - itBenchmark.pre).toFixed(1);
         const gE = (rawData.cefExt[20] - itBenchmark.ext).toFixed(1);
+        const gAlb = (cefAlb[20] - itAlb[20]).toFixed(1);
         document.getElementById('reportContent').innerHTML = `
             <div class="report-title">Sintesi Cefalù 2004-2024</div>
             <div class="data-group">
                 <div class="group-label">Pre-2012</div>
-                <div class="data-row"><span>Arrivi</span><span class="value" style="color:#c0392b">${(rawData.cefArr[0]-100).toFixed(1)}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value" style="color:#c0392b">${(rawData.cefPre[0]-100).toFixed(1)}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value" style="color:#c0392b">${(rawData.cefExt[0]-100).toFixed(1)}%</span></div>
+                <div class="data-row"><span>Arrivi</span><span class="value" style="color:#c0392b">${sgn(rawData.cefArr[0]-100)}%</span></div>
+                <div class="data-row"><span>Presenze</span><span class="value" style="color:#c0392b">${sgn(rawData.cefPre[0]-100)}%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value" style="color:#c0392b">${sgn(cefAlb[0]-100)}%</span></div>
+                <div class="data-row"><span>Extra-Alb</span><span class="value" style="color:#c0392b">${sgn(rawData.cefExt[0]-100)}%</span></div>
             </div>
             <div class="data-group">
                 <div class="group-label" style="color:var(--accent)">Post-2012</div>
                 <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.cefArr[20])}%</span></div>
                 <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[20])}%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value">${fmt(cefAlb[20])}%</span></div>
                 <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[20])}%</span></div>
             </div>
             <div class="data-group">
                 <div class="group-label">Pre-COVID (2019 vs 2012)</div>
                 <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.cefArr[15])}%</span></div>
                 <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[15])}%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value">${fmt(cefAlb[15])}%</span></div>
                 <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[15])}%</span></div>
             </div>
             <div class="data-group">
                 <div class="group-label" style="color:#457b9d">Post-COVID (2024 vs 2019)</div>
-                <div class="data-row"><span>Arrivi</span><span class="value">${((rawData.cefArr[20]/rawData.cefArr[15]-1)*100).toFixed(1).replace(/^([^-])/,'+$1')}%</span></div>
-                <div class="data-row"><span>Presenze</span><span class="value">${((rawData.cefPre[20]/rawData.cefPre[15]-1)*100).toFixed(1).replace(/^([^-])/,'+$1')}%</span></div>
-                <div class="data-row"><span>Extra-Alb</span><span class="value">${((rawData.cefExt[20]/rawData.cefExt[15]-1)*100).toFixed(1).replace(/^([^-])/,'+$1')}%</span></div>
+                <div class="data-row"><span>Arrivi</span><span class="value">${sgn((rawData.cefArr[20]/rawData.cefArr[15]-1)*100)}%</span></div>
+                <div class="data-row"><span>Presenze</span><span class="value">${sgn((rawData.cefPre[20]/rawData.cefPre[15]-1)*100)}%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value">${sgn((cefAlb[20]/cefAlb[15]-1)*100)}%</span></div>
+                <div class="data-row"><span>Extra-Alb</span><span class="value">${sgn((rawData.cefExt[20]/rawData.cefExt[15]-1)*100)}%</span></div>
             </div>
             <div class="data-group">
                 <div class="group-label">Confronto Media Nazionale<br>al 2024</div>
                 <div class="data-row"><span>Arrivi</span><span class="value" style="color:var(--accent)">+${gA}%</span></div>
                 <div class="data-row"><span>Presenze</span><span class="value" style="color:var(--accent)">+${gP}%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value" style="color:var(--accent)">${sgn(parseFloat(gAlb))}%</span></div>
                 <div class="data-row"><span>Extra-Alb</span><span class="value" style="color:var(--accent)">+${gE}%</span></div>
             </div>`;
         updateShapes();
@@ -490,12 +509,14 @@
                 <div class="group-label" style="color:var(--accent)">Cefalù</div>
                 <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.cefArr[idx])}%</span></div>
                 <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.cefPre[idx])}%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value">${fmt(cefAlb[idx])}%</span></div>
                 <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.cefExt[idx])}%</span></div>
             </div>
             <div class="data-group" style="border-left: 4px solid #99aab5;">
                 <div class="group-label" style="color:#697386">Italia</div>
                 <div class="data-row"><span>Arrivi</span><span class="value">${fmt(rawData.itArr[idx])}%</span></div>
                 <div class="data-row"><span>Presenze</span><span class="value">${fmt(rawData.itPre[idx])}%</span></div>
+                <div class="data-row"><span>Alb</span><span class="value">${fmt(itAlb[idx])}%</span></div>
                 <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(rawData.itExt[idx])}%</span></div>
             </div>`;
         updateShapes();
@@ -653,6 +674,7 @@
                     mkDataset('Cef: Extra-Alb', rawData.cefExt, '#24b27e', 3,   false),
                     mkDataset('IT: Presenze',   rawData.itPre,  '#00cccc', 1.5, true),
                     mkDataset('IT: Arrivi',     rawData.itArr,  '#ffc300', 1.5, true),
+                    mkDataset('IT: Alb',        itAlb,          '#ff8c42', 1.5, true),
                     mkDataset('IT: Extra-Alb',  rawData.itExt,  '#9c27b0', 1.5, true)
                 ]
             },
