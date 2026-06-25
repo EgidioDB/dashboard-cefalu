@@ -663,12 +663,18 @@
         }
 
         let _t = null, _pd = null, _dir = null, _wasPinch = false, _lastTap = 0;
+        let _tapStart = null; // {x, y, time}
 
         mobileCanvas.addEventListener('touchstart', e => {
-            _t  = e.touches;
-            _pd = e.touches.length === 2 ? touchDist(e.touches) : null;
+            _t   = e.touches;
+            _pd  = e.touches.length === 2 ? touchDist(e.touches) : null;
             _dir = null;
-            if (e.touches.length >= 2) _wasPinch = true;
+            if (e.touches.length >= 2) {
+                _wasPinch = true;
+                _tapStart = null;
+            } else if (e.touches.length === 1) {
+                _tapStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() };
+            }
         }, { passive: true });
 
         mobileCanvas.addEventListener('touchmove', e => {
@@ -681,6 +687,7 @@
                 e.preventDefault();
                 _dir = 'pinch';
                 _wasPinch = true;
+                _tapStart = null;
                 const cd = touchDist(e.touches);
                 if (_pd > 0) {
                     const raw     = _pd / cd;
@@ -699,6 +706,7 @@
 
                 if (_dir === 'pan') {
                     e.preventDefault();
+                    _tapStart = null; // movimento → non è tap
                     const delta = -(dx / pw) * span;
                     applyRange(sc.min + delta, sc.max + delta);
                 }
@@ -709,15 +717,36 @@
         mobileCanvas.addEventListener('touchend', e => {
             const isFinalLift = e.touches.length === 0;
 
-            // Doppio tap solo su gesti a 1 dito (mai dopo un pinch)
-            if (isFinalLift && !_wasPinch) {
-                const now = Date.now();
-                if (now - _lastTap < 300) applyRange(2004, 2024);
-                _lastTap = now;
+            if (isFinalLift && !_wasPinch && _tapStart) {
+                const ct = e.changedTouches[0];
+                const dx = Math.abs(ct.clientX - _tapStart.x);
+                const dy = Math.abs(ct.clientY - _tapStart.y);
+                const dt = Date.now() - _tapStart.time;
+
+                if (dt < 300 && dx < 12 && dy < 12) {
+                    // Doppio tap → reset
+                    const now = Date.now();
+                    if (now - _lastTap < 400) {
+                        applyRange(2004, 2024);
+                        showTotalReport();
+                    } else {
+                        // Tap singolo → seleziona anno
+                        const sc  = mobileChartInstance.scales.x;
+                        const pw  = mobileCanvas.offsetWidth;
+                        const rect = mobileCanvas.getBoundingClientRect();
+                        const pxInPlot = ct.clientX - rect.left - (mobileChartInstance.chartArea ? mobileChartInstance.chartArea.left : 40);
+                        const chartW   = mobileChartInstance.chartArea ? mobileChartInstance.chartArea.width : pw - 50;
+                        const dataX    = sc.min + (pxInPlot / chartW) * (sc.max - sc.min);
+                        const year     = Math.round(dataX);
+                        const idx      = years.indexOf(year);
+                        if (idx !== -1) showYearlyReport(idx);
+                    }
+                    _lastTap = now;
+                }
             }
 
             if (isFinalLift) {
-                _t = null; _pd = null; _dir = null; _wasPinch = false;
+                _t = null; _pd = null; _dir = null; _wasPinch = false; _tapStart = null;
             } else {
                 _t = e.touches;
                 _pd = e.touches.length === 2 ? touchDist(e.touches) : null;
