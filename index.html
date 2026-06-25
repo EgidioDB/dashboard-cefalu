@@ -61,7 +61,7 @@
         
         .report-title { font-size: 1.1em; font-weight: 700; margin-bottom: 15px; border-bottom: 2px solid var(--bg-color); padding-bottom: 8px; }
         .data-group { margin-bottom: 12px; padding: 10px; background: #f8fafc; border-radius: 8px; }
-        .group-label { font-size: 0.7em; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; color: var(--text-sub); }
+        .group-label { font-size: 0.7em; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; color: var(--text-sub); }
         .data-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.82em; }
         .value { font-weight: 700; color: var(--text-main); }
 
@@ -358,13 +358,13 @@
                     </div>
                     <div class="data-group" style="border-left: 4px solid #457b9d; background: #f0f7ff;">
                         <div class="group-label" style="color:#457b9d">Top City: ${data.top.name}</div>
-                        <div class="group-label" style="font-size:0.6em; margin-top:5px;">Pre-COVID (2019 vs 2014)</div>
+                        <div class="group-label" style="font-size:0.6em; margin-top:15px;">Pre-COVID (2019 vs 2014)</div>
                         ${data.top.preArr === null
                             ? `<div class="data-row"><span style="color:var(--text-sub);font-style:italic;font-size:0.9em">Dati non disponibili per il 2019</span></div>`
                             : `<div class="data-row"><span>Arrivi</span><span class="value">${data.top.preArr > 0 ? '+' : ''}${data.top.preArr}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${data.top.prePre > 0 ? '+' : ''}${data.top.prePre}%</span></div>
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${data.top.preExt > 0 ? '+' : ''}${data.top.preExt}%</span></div>`}
-                        <div class="group-label" style="font-size:0.6em; margin-top:5px; color:var(--accent)">Crescita totale (2024 vs 2014)</div>
+                        <div class="group-label" style="font-size:0.6em; margin-top:15px; color:var(--accent)">Crescita totale (2024 vs 2014)</div>
                         <div class="data-row"><span>Arrivi</span><span class="value">${fmt(data.top.arr)}%</span></div>
                         <div class="data-row"><span>Presenze</span><span class="value">${fmt(data.top.pre)}%</span></div>
                         <div class="data-row"><span>Extra-Alb</span><span class="value">${fmt(data.top.ext)}%</span></div>
@@ -662,12 +662,13 @@
             mobileChartInstance.update('none');
         }
 
-        let _t = null, _pd = null, _dir = null;
+        let _t = null, _pd = null, _dir = null, _wasPinch = false, _lastTap = 0;
 
         mobileCanvas.addEventListener('touchstart', e => {
             _t  = e.touches;
             _pd = e.touches.length === 2 ? touchDist(e.touches) : null;
             _dir = null;
+            if (e.touches.length >= 2) _wasPinch = true;
         }, { passive: true });
 
         mobileCanvas.addEventListener('touchmove', e => {
@@ -677,16 +678,15 @@
             const pw   = mobileCanvas.offsetWidth;
 
             if (e.touches.length === 2) {
-                // PINCH — sempre intercettato
                 e.preventDefault();
                 _dir = 'pinch';
+                _wasPinch = true;
                 const cd = touchDist(e.touches);
                 if (_pd > 0) {
-                    // Dampen: max ±15% per frame per evitare scatti
-                    const raw    = _pd / cd;
-                    const ratio  = Math.max(0.85, Math.min(1.15, 1 + (raw - 1) * 0.5));
+                    const raw     = _pd / cd;
+                    const ratio   = Math.max(0.85, Math.min(1.15, 1 + (raw - 1) * 0.5));
                     const newSpan = Math.max(3, Math.min(21, span * ratio));
-                    const mid    = (sc.min + sc.max) / 2;
+                    const mid     = (sc.min + sc.max) / 2;
                     applyRange(mid - newSpan / 2, mid + newSpan / 2);
                 }
                 _pd = cd;
@@ -702,23 +702,26 @@
                     const delta = -(dx / pw) * span;
                     applyRange(sc.min + delta, sc.max + delta);
                 }
-                // 'scroll' → non preventDefault, la pagina scrolla normalmente
             }
             _t = e.touches;
         }, { passive: false });
 
         mobileCanvas.addEventListener('touchend', e => {
-            _t   = e.touches.length > 0 ? e.touches : null;
-            _pd  = null;
-            _dir = null;
-        }, { passive: true });
+            const isFinalLift = e.touches.length === 0;
 
-        // Doppio tap → reset
-        let _lastTap = 0;
-        mobileCanvas.addEventListener('touchend', e => {
-            const now = Date.now();
-            if (now - _lastTap < 300) applyRange(2004, 2024);
-            _lastTap = now;
+            // Doppio tap solo su gesti a 1 dito (mai dopo un pinch)
+            if (isFinalLift && !_wasPinch) {
+                const now = Date.now();
+                if (now - _lastTap < 300) applyRange(2004, 2024);
+                _lastTap = now;
+            }
+
+            if (isFinalLift) {
+                _t = null; _pd = null; _dir = null; _wasPinch = false;
+            } else {
+                _t = e.touches;
+                _pd = e.touches.length === 2 ? touchDist(e.touches) : null;
+            }
         }, { passive: true });
     }
 
