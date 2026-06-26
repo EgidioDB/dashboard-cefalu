@@ -672,8 +672,8 @@
     Plotly.newPlot(chartDiv, traces, {
         dragmode: 'pan',
         showlegend: true,
-        legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
-        margin: { l: 40, r: 15, t: 10, b: 80 },
+        legend: { orientation: 'h', y: -0.22, x: 0.5, xanchor: 'center' },
+        margin: { l: 40, r: 15, t: 10, b: 100 },
         plot_bgcolor: '#ffffff',
         hovermode: 'x',
         xaxis: { gridcolor: '#f0f2f5', type: 'linear', dtick: 2, tickformat: 'd', fixedrange: false, autorange: true },
@@ -692,7 +692,26 @@
     // Eventi Hover e Click
     chartDiv.on('plotly_hover', (data) => updateShapes(data.points[0].x));
     chartDiv.on('plotly_unhover', () => updateShapes(null));
+    let _tapOk = false, _tapX = 0, _tapY = 0, _tapT = 0;
+    chartDiv.addEventListener('touchstart', function(e) {
+        if (e.touches.length !== 1) { _tapOk = false; return; }
+        _tapOk = true;
+        _tapX = e.touches[0].clientX;
+        _tapY = e.touches[0].clientY;
+        _tapT = Date.now();
+    }, { passive: true });
+    chartDiv.addEventListener('touchmove', function(e) {
+        if (!_tapOk) return;
+        const dx = Math.abs(e.touches[0].clientX - _tapX);
+        const dy = Math.abs(e.touches[0].clientY - _tapY);
+        if (dx > 6 || dy > 6) _tapOk = false;
+    }, { passive: true });
     chartDiv.addEventListener('click', function(e) {
+        const isTouch = e.pointerType === 'touch' || (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents);
+        if (isTouch) {
+            if (!_tapOk || (Date.now() - _tapT) > 380) { _tapOk = false; return; }
+            _tapOk = false;
+        }
         const fl = chartDiv._fullLayout;
         if (!fl || !fl.xaxis) return;
         const bbox = chartDiv.getBoundingClientRect();
