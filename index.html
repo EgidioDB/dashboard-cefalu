@@ -116,9 +116,12 @@
         }
         #infoBox strong { display: block; margin-bottom: 8px; font-size: 1em; }
         .info-fonte { display: block; margin-top: 13px; font-size: 0.82em; opacity: 0.55; font-style: italic; }
-        .data-row { cursor: pointer; border-radius: 3px; margin: 0 -4px; padding: 3px 4px; transition: background .1s; }
+        .data-row { cursor: pointer; border-radius: 3px; margin: 0 -4px; padding: 6px 4px; transition: background .1s; }
         .data-row:hover { background: rgba(0,0,0,0.04); }
         .data-row.dr-open { background: rgba(69,123,157,0.1); border-radius: 3px 3px 0 0; }
+        .data-row > span:first-child { flex: 1; }
+        .data-row[data-nominal]::after { content: '›'; font-size: 1em; opacity: 0.55; display: inline-block; transform: rotate(90deg); flex-shrink: 0; align-self: center; margin-left: 11px; line-height: 1; transition: transform 0.22s ease, opacity 0.15s; }
+        .data-row.dr-open::after { transform: rotate(-90deg); opacity: 0.8; }
         .nominal-row { font-size: 0.76em; color: var(--text-sub); line-height: 1.5; margin: 0 -4px 2px; border-bottom: 1px dashed rgba(0,0,0,0); max-height: 0; overflow: hidden; opacity: 0; padding: 0 4px; transition: max-height 0.28s ease, opacity 0.22s ease, padding 0.28s ease, border-color 0.28s ease; }
         .nominal-row.nom-open { max-height: 300px; opacity: 1; padding: 7px 4px 9px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
         .nom-r { display:flex; justify-content:space-between; gap:8px; margin-bottom:5px; }
@@ -694,7 +697,9 @@
         if (!fl || !fl.xaxis) return;
         const bbox = chartDiv.getBoundingClientRect();
         const xPixel = e.clientX - bbox.left - fl._size.l;
+        const yPixel = e.clientY - bbox.top  - fl._size.t;
         if (xPixel < 0 || xPixel > fl._size.w) return;
+        if (yPixel < 0 || yPixel > fl._size.h) return;
         const xr = fl.xaxis.range;
         const xValue = xr[0] + (xPixel / fl._size.w) * (xr[1] - xr[0]);
         const yearIdx = Math.round(xValue) - 2004;
