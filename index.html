@@ -199,6 +199,7 @@
                 <h1>Evoluzione Storica <button class="info-btn" onclick="showInfo('chart_evol')">i</button></h1>
             </div>
             <div id="chart"></div>
+            <div id="chartLegendSpacer" style="height:12px;"></div>
             <div id="mobileChartWrap" style="display:none; position:relative; height:340px; width:100%;">
                 <canvas id="mobileChart"></canvas>
             </div>
@@ -873,7 +874,7 @@
                     }
                 },
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 18, padding: 8 } },
+                    legend: { position: 'bottom', padding: 14, labels: { font: { size: 10 }, boxWidth: 18, padding: 8 } },
                     tooltip: { enabled: false }
                 }
             }
@@ -974,13 +975,16 @@
                         const ca       = mobileChartInstance.chartArea;
                         const rect     = mobileCanvas.getBoundingClientRect();
                         const pxInPlot = ct.clientX - rect.left - ca.left;
-                        const dataX    = sc.min + (pxInPlot / ca.width) * (sc.max - sc.min);
-                        const year     = Math.round(dataX);
-                        const idx      = years.indexOf(year);
-                        if (idx !== -1) {
-                            _selectedYear = year;
-                            mobileChartInstance.update('none');
-                            showYearlyReport(idx);
+                        const pyInPlot = ct.clientY - rect.top  - ca.top;
+                        if (pyInPlot >= 0 && pyInPlot <= ca.height) {
+                            const dataX = sc.min + (pxInPlot / ca.width) * (sc.max - sc.min);
+                            const year  = Math.round(dataX);
+                            const idx   = years.indexOf(year);
+                            if (idx !== -1) {
+                                _selectedYear = year;
+                                mobileChartInstance.update('none');
+                                showYearlyReport(idx);
+                            }
                         }
                     }
                     _lastTap = now;
